@@ -816,9 +816,10 @@ elif page == "🤖 AI Assistant":
                                 
                                 full_response += f"No results found.\n\n**Explanation:** {explanation}"
                         else:
-                            error_msg = result.get('explanation', 'Error processing query.')
-                            st.error(error_msg)
-                            full_response = f"Error: {error_msg}"
+                            # Conversational response (no SQL generated)
+                            response_text = result.get('explanation', 'I can help you with that!')
+                            st.markdown(response_text)
+                            full_response = response_text
                         
                         st.session_state.messages.append({"role": "assistant", "content": full_response})
                     except Exception as e:
