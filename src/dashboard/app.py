@@ -14,12 +14,11 @@ from src import config
 
 # Check if database exists and has data, if not run pipeline
 db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
+setup_complete_flag = Path(__file__).parent.parent.parent / "data" / ".setup_complete"
 needs_setup = False
 
-# Only run setup if explicitly needed (file doesn't exist)
-if not db_path.exists():
-    needs_setup = True
-elif db_path.stat().st_size < 1000:  # Database file is too small (likely empty)
+# Only run setup if flag file doesn't exist
+if not setup_complete_flag.exists():
     needs_setup = True
 
 if needs_setup:
@@ -29,6 +28,8 @@ if needs_setup:
             from src.elt.pipeline import ELTPipeline
             pipeline = ELTPipeline()
             pipeline.run_full_pipeline()
+            # Create flag file to indicate setup is complete
+            setup_complete_flag.touch()
             st.success("✅ Data loaded successfully!")
             st.rerun()
         except Exception as e:
