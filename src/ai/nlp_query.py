@@ -283,7 +283,7 @@ Be conversational and helpful. Don't just list numbers - explain what they mean.
                             {"role": "user", "content": analysis_prompt}
                         ],
                         temperature=0.7,
-                        max_tokens=400
+                        max_tokens=600
                     )
                     
                     analysis_text = analysis_response.choices[0].message.content.strip()
