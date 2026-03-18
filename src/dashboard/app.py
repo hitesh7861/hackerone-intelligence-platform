@@ -12,56 +12,6 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from src.database.connection import DatabaseConnection
 from src import config
 
-# Check if database exists and has data, if not run pipeline
-db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
-needs_setup = False
-
-# Check if database exists and has data
-if not db_path.exists():
-    needs_setup = True
-else:
-    # Check if database has data and views by querying fact_reports and views
-    try:
-        import duckdb
-        conn = duckdb.connect(str(db_path), read_only=True)
-        try:
-            # Check if fact_reports table exists and has data
-            result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
-            if result[0] == 0:
-                needs_setup = True
-            else:
-                # Check if views exist (pipeline completed)
-                try:
-                    conn.execute("SELECT COUNT(*) FROM vw_organization_metrics").fetchone()
-                except:
-                    # Views don't exist, pipeline didn't complete
-                    needs_setup = True
-        except:
-            # Table doesn't exist
-            needs_setup = True
-        finally:
-            conn.close()
-    except:
-        needs_setup = True
-
-if needs_setup:
-    st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
-    with st.spinner("Loading data..."):
-        try:
-            # Delete existing database if it exists but is empty/corrupted
-            if db_path.exists():
-                db_path.unlink()
-            
-            from src.elt.pipeline import ELTPipeline
-            pipeline = ELTPipeline()
-            pipeline.run_full_pipeline()
-            st.success("✅ Data loaded successfully!")
-            st.rerun()
-        except Exception as e:
-            st.error(f"❌ Error loading data: {str(e)}")
-            st.info("Try refreshing the page or contact support if the issue persists.")
-            st.stop()
-
 st.set_page_config(
     page_title="HackerOne Intelligence Platform",
     page_icon="H1",
@@ -425,6 +375,56 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Check if database exists and has data, if not run pipeline
+db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
+needs_setup = False
+
+# Check if database exists and has data
+if not db_path.exists():
+    needs_setup = True
+else:
+    # Check if database has data and views by querying fact_reports and views
+    try:
+        import duckdb
+        conn = duckdb.connect(str(db_path), read_only=True)
+        try:
+            # Check if fact_reports table exists and has data
+            result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
+            if result[0] == 0:
+                needs_setup = True
+            else:
+                # Check if views exist (pipeline completed)
+                try:
+                    conn.execute("SELECT COUNT(*) FROM vw_organization_metrics").fetchone()
+                except:
+                    # Views don't exist, pipeline didn't complete
+                    needs_setup = True
+        except:
+            # Table doesn't exist
+            needs_setup = True
+        finally:
+            conn.close()
+    except:
+        needs_setup = True
+
+if needs_setup:
+    st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
+    with st.spinner("Loading data..."):
+        try:
+            # Delete existing database if it exists but is empty/corrupted
+            if db_path.exists():
+                db_path.unlink()
+            
+            from src.elt.pipeline import ELTPipeline
+            pipeline = ELTPipeline()
+            pipeline.run_full_pipeline()
+            st.success("✅ Data loaded successfully!")
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Error loading data: {str(e)}")
+            st.info("Try refreshing the page or contact support if the issue persists.")
+            st.stop()
 
 @st.cache_resource
 def get_db_connection():
