@@ -146,57 +146,44 @@ Respond with ONLY one word: conversation or data_query"""
             if query_type == "conversation":
                 logger.info("Handling conversational query...")
                 
-                platform_context = """
-You are an AI assistant for the HackerOne Intelligence Platform. Here's what you should know:
+                try:
+                    platform_context = """You are a friendly AI assistant for the HackerOne Intelligence Platform. Be helpful and concise.
 
-**Platform Overview:**
-This is an enterprise vulnerability intelligence platform that analyzes 10,000+ real HackerOne vulnerability reports.
+The platform analyzes 10,000+ vulnerability reports with features like:
+- Interactive dashboards with key metrics
+- AI-powered insights
+- Multiple pages: Dashboard, Security Threats, Companies, Researchers, Timeline, Reports, Knowledge Base, Search, and AI Assistant
 
-**Dashboard Pages:**
-1. **Dashboard** - Overview with key metrics (total reports, bounty rate, top vulnerabilities and organizations)
-2. **Security Threats** - Deep dive into vulnerability types, severity analysis, and risk assessment
-3. **Companies** - Organization performance metrics, bounty statistics, and top performers
-4. **Researchers** - Security researcher analytics, top contributors, and their impact
-5. **Timeline & Patterns** - Time-series trends, monthly activity, and pattern analysis
-6. **Intelligence Reports** - Detailed vulnerability reports with AI-powered summaries
-7. **Knowledge Base** - Glossary of vulnerability types and security terms
-8. **Search & Export** - Advanced search and data export functionality
-9. **AI Assistant** (this page) - Natural language interface to query and explore the data
-
-**Key Features:**
-- Interactive visualizations with Plotly charts
-- AI-powered insights and report summarization
-- Conversation memory (remembers last 5 messages)
-- One-click data refresh
-- Role-based access (admin vs customer views)
-- Export data to CSV
-
-**What I Can Help With:**
-- Answer questions about the platform and its features
-- Explain what different tabs/pages do
-- Query the vulnerability database using natural language
-- Provide statistics and trends about vulnerabilities, organizations, and researchers
-- Summarize vulnerability reports
-"""
-                
-                conversation_response = self.client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": platform_context},
-                        {"role": "user", "content": user_query}
-                    ],
-                    temperature=0.7,
-                    max_tokens=300
-                )
-                
-                response_text = conversation_response.choices[0].message.content.strip()
-                
-                return {
-                    "query": user_query,
-                    "sql_generated": None,
-                    "results": [],
-                    "explanation": response_text
-                }
+You can help users understand the platform or query the vulnerability data."""
+                    
+                    conversation_response = self.client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": platform_context},
+                            {"role": "user", "content": user_query}
+                        ],
+                        temperature=0.7,
+                        max_tokens=200
+                    )
+                    
+                    response_text = conversation_response.choices[0].message.content.strip()
+                    logger.info(f"Conversational response generated successfully")
+                    
+                    return {
+                        "query": user_query,
+                        "sql_generated": None,
+                        "results": [],
+                        "explanation": response_text
+                    }
+                except Exception as conv_error:
+                    logger.error(f"Error in conversational response: {conv_error}")
+                    # Fallback to simple response
+                    return {
+                        "query": user_query,
+                        "sql_generated": None,
+                        "results": [],
+                        "explanation": "Hello! I'm the AI assistant for the HackerOne Intelligence Platform. I can help you explore vulnerability data or answer questions about the platform. What would you like to know?"
+                    }
             
             # Handle data queries - generate SQL
             logger.info("Handling data query - generating SQL...")
