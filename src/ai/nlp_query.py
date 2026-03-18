@@ -17,19 +17,9 @@ class NLPQueryEngine:
         
         logger.info(f"OpenAI API key configured: {config.OPENAI_API_KEY[:10]}...")
         
-        # Clear any proxy environment variables that might interfere
-        for key in ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']:
-            if key in os.environ:
-                logger.info(f"Removing {key} environment variable")
-                del os.environ[key]
-        
-        # Use OpenAI 1.0+ API with explicit parameters
+        # Use OpenAI 1.0+ API with minimal parameters
         try:
-            self.client = OpenAI(
-                api_key=config.OPENAI_API_KEY,
-                timeout=30.0,
-                max_retries=2
-            )
+            self.client = OpenAI(api_key=config.OPENAI_API_KEY)
             logger.info("OpenAI client created successfully")
         except Exception as e:
             logger.error(f"Failed to create OpenAI client: {e}")
