@@ -20,14 +20,22 @@ needs_setup = False
 if not db_path.exists():
     needs_setup = True
 else:
-    # Check if database has data by querying fact_reports
+    # Check if database has data and views by querying fact_reports and views
     try:
         import duckdb
         conn = duckdb.connect(str(db_path), read_only=True)
         try:
+            # Check if fact_reports table exists and has data
             result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
             if result[0] == 0:
                 needs_setup = True
+            else:
+                # Check if views exist (pipeline completed)
+                try:
+                    conn.execute("SELECT COUNT(*) FROM vw_organization_metrics").fetchone()
+                except:
+                    # Views don't exist, pipeline didn't complete
+                    needs_setup = True
         except:
             # Table doesn't exist
             needs_setup = True
