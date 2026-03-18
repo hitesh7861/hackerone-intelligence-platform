@@ -103,12 +103,11 @@ class DataTransformer:
                 v.weakness_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(f.severity_score), 2) as avg_severity,
+                ROUND(AVG(CASE WHEN f.severity_score > 0 THEN f.severity_score ELSE NULL END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate
             FROM fact_reports f
-            LEFT JOIN dim_vulnerabilities v ON f.weakness_id = v.weakness_id
-            WHERE v.weakness_name IS NOT NULL
+            JOIN dim_vulnerabilities v ON f.weakness_id = v.weakness_id
             GROUP BY v.weakness_name
             ORDER BY total_reports DESC
         """)
@@ -120,14 +119,13 @@ class DataTransformer:
                 o.team_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(f.severity_score), 2) as avg_severity,
+                ROUND(AVG(CASE WHEN f.severity_score > 0 THEN f.severity_score ELSE NULL END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate,
                 o.first_report_date,
                 o.latest_report_date
             FROM fact_reports f
-            LEFT JOIN dim_organizations o ON f.team_handle = o.team_handle
-            WHERE o.team_handle IS NOT NULL
+            JOIN dim_organizations o ON f.team_handle = o.team_handle
             GROUP BY o.team_handle, o.team_name, o.first_report_date, o.latest_report_date
             ORDER BY total_reports DESC
         """)
@@ -139,7 +137,7 @@ class DataTransformer:
                 r.reporter_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(f.severity_score), 2) as avg_severity,
+                ROUND(AVG(CASE WHEN f.severity_score > 0 THEN f.severity_score ELSE NULL END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate,
                 r.first_report_date,
@@ -157,13 +155,12 @@ class DataTransformer:
                 DATE_TRUNC('month', created_at) as month,
                 COUNT(DISTINCT id) as total_reports,
                 SUM(CASE WHEN has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(severity_score), 2) as avg_severity,
+                ROUND(AVG(CASE WHEN severity_score > 0 THEN severity_score ELSE NULL END), 2) as avg_severity,
                 COUNT(DISTINCT team_handle) as active_organizations,
                 COUNT(DISTINCT reporter_username) as active_reporters
             FROM fact_reports
-            WHERE created_at IS NOT NULL
             GROUP BY DATE_TRUNC('month', created_at)
-            ORDER BY month
+            ORDER BY month DESC
         """)
         
         conn.execute("""

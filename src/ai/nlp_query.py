@@ -2,63 +2,184 @@ from openai import OpenAI
 from src import config
 from src.database.connection import DatabaseConnection
 import logging
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class NLPQueryEngine:
     def __init__(self):
+        logger.info("Initializing NLP Query Engine...")
+        
         if not config.AI_ENABLED:
+            logger.error("OpenAI API key not configured")
             raise ValueError("OpenAI API key not configured")
         
-        self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+        logger.info(f"OpenAI API key configured: {config.OPENAI_API_KEY[:10]}...")
+        
+        # Clear any proxy environment variables that might interfere
+        for key in ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']:
+            if key in os.environ:
+                logger.info(f"Removing {key} environment variable")
+                del os.environ[key]
+        
+        # Use OpenAI 1.0+ API with explicit parameters
+        try:
+            self.client = OpenAI(
+                api_key=config.OPENAI_API_KEY,
+                timeout=30.0,
+                max_retries=2
+            )
+            logger.info("OpenAI client created successfully")
+        except Exception as e:
+            logger.error(f"Failed to create OpenAI client: {e}")
+            raise
+        
         self.db = DatabaseConnection()
+        logger.info("NLP Query Engine initialized successfully")
         
         self.schema_context = """
-        Database Schema:
+        Database: DuckDB
         
         Tables:
         1. fact_reports: Main fact table with report details
-           - id, created_at, disclosed_at, weakness_id, reporter_username, team_handle
-           - severity_rating, severity_score, bounty_amount, has_bounty, vote_count
+           - id (VARCHAR): Unique report identifier
+           - created_at (TIMESTAMP): Report creation date
+           - disclosed_at (TIMESTAMP): Report disclosure date
+           - weakness_id (VARCHAR): Foreign key to dim_vulnerabilities
+           - reporter_username (VARCHAR): Reporter username
+           - team_handle (VARCHAR): Foreign key to dim_organizations
+           - severity_rating (VARCHAR): Severity level (e.g., 'critical', 'high', 'medium', 'low')
+           - severity_score (DOUBLE): Numeric severity score
+           - bounty_amount (DOUBLE): Bounty amount in USD
+           - has_bounty (BOOLEAN): Whether bounty was awarded
+           - vote_count (INTEGER): Number of votes
         
         2. dim_vulnerabilities: Vulnerability dimension
-           - weakness_id, weakness_name
+           - weakness_id (VARCHAR): Primary key
+           - weakness_name (VARCHAR): Vulnerability type name
         
         3. dim_organizations: Organization dimension
-           - team_handle, team_name, first_report_date, latest_report_date
+           - team_handle (VARCHAR): Primary key
+           - team_name (VARCHAR): Organization name
+           - first_report_date (TIMESTAMP): First report date
+           - latest_report_date (TIMESTAMP): Latest report date
         
-        4. dim_reporters: Reporter dimension
-           - reporter_username, reporter_name, first_report_date, latest_report_date
+        4. dim_researchers: Researcher dimension
+           - reporter_username (VARCHAR): Primary key
+           - total_reports (INTEGER): Total number of reports
         
-        Views:
-        - vw_vulnerability_metrics: Aggregated vulnerability statistics
-        - vw_organization_metrics: Organization performance metrics
-        - vw_reporter_metrics: Reporter performance metrics
-        - vw_time_trends: Monthly trend analysis
-        - vw_severity_analysis: Severity-based analysis
+        IMPORTANT NOTES:
+        - To count researchers: Use COUNT(DISTINCT reporter_username) FROM fact_reports
+        - To count organizations: Use COUNT(DISTINCT team_handle) FROM fact_reports
+        - To count vulnerabilities: Use COUNT(DISTINCT weakness_id) FROM fact_reports
+        - The dim_* tables are for detailed info, but counts should come from fact_reports
+        
+        DuckDB Syntax Rules (IMPORTANT):
+        - Use TIMESTAMP type for dates (not DATETIME)
+        - Date difference: date_diff('day', date1, date2) or EXTRACT(day FROM date2 - date1)
+        - JOIN syntax: JOIN table_name ON condition (use proper ON keyword)
+        - String comparison is case-sensitive
+        - Use CAST() for type conversions
+        - Aggregate functions: COUNT(), SUM(), AVG(), MAX(), MIN()
+        - Always use proper table aliases in JOINs
+        
+        Example Queries:
+        - Total reports: SELECT COUNT(*) FROM fact_reports
+        - Total researchers: SELECT COUNT(DISTINCT reporter_username) FROM fact_reports
+        - Total organizations: SELECT COUNT(DISTINCT team_handle) FROM fact_reports
+        - With JOIN: SELECT o.team_name, COUNT(*) FROM fact_reports r JOIN dim_organizations o ON r.team_handle = o.team_handle GROUP BY o.team_name
+        - Date diff: SELECT AVG(date_diff('day', created_at, disclosed_at)) FROM fact_reports WHERE disclosed_at IS NOT NULL
         """
     
-    def process_query(self, user_query: str, current_user: dict):
+    def process_query(self, user_query: str, current_user: dict, conversation_history: list = None):
         logger.info(f"Processing NLP query: {user_query}")
+        
+        if conversation_history is None:
+            conversation_history = []
         
         user_context = ""
         if current_user["role"] == "customer" and current_user["organization"]:
             user_context = f"\nUser is a customer with organization: {current_user['organization']}. Filter results to this organization only."
         
-        prompt = f"""You are a SQL expert for a vulnerability intelligence database.
+        # Build conversation context from history (last 5 messages)
+        conversation_context = ""
+        if conversation_history:
+            recent_history = conversation_history[-5:]  # Last 5 messages
+            conversation_context = "\n\nConversation History:\n"
+            for msg in recent_history:
+                role = msg.get('role', 'user')
+                content = msg.get('content', '')[:200]  # Truncate long messages
+                conversation_context += f"{role}: {content}\n"
+        
+        # First, check if this is a conversational query or a data query
+        classification_prompt = f"""Classify this user message as either 'conversation' or 'data_query':
+
+{conversation_context}
+
+Current user message: "{user_query}"
+
+Rules:
+- 'conversation': greetings (hi, hello, hey), thanks, casual chat, questions about the assistant itself
+- 'data_query': questions about vulnerabilities, reports, organizations, researchers, statistics, trends
+
+Respond with ONLY one word: conversation or data_query"""
+
+        try:
+            logger.info("Classifying query type...")
+            classification = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a query classifier. Respond with only 'conversation' or 'data_query'."},
+                    {"role": "user", "content": classification_prompt}
+                ],
+                temperature=0,
+                max_tokens=10
+            )
+            
+            query_type = classification.choices[0].message.content.strip().lower()
+            logger.info(f"Query classified as: {query_type}")
+            
+            # Handle conversational queries
+            if query_type == "conversation":
+                logger.info("Handling conversational query...")
+                conversation_response = self.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful AI assistant for a HackerOne vulnerability intelligence platform. Be friendly, concise, and helpful. Mention that you can help analyze vulnerability data, reports, trends, and statistics."},
+                        {"role": "user", "content": user_query}
+                    ],
+                    temperature=0.7,
+                    max_tokens=200
+                )
+                
+                response_text = conversation_response.choices[0].message.content.strip()
+                
+                return {
+                    "query": user_query,
+                    "sql_generated": None,
+                    "results": [],
+                    "explanation": response_text
+                }
+            
+            # Handle data queries - generate SQL
+            logger.info("Handling data query - generating SQL...")
+            prompt = f"""You are a SQL expert for a vulnerability intelligence database.
         
 {self.schema_context}
 
 {user_context}
 
-User query: {user_query}
+{conversation_context}
 
-Generate a DuckDB SQL query to answer this question. Return ONLY the SQL query, no explanations.
+Current user query: {user_query}
+
+Generate a DuckDB SQL query to answer this question. Consider the conversation history for context (e.g., follow-up questions).
+Return ONLY the SQL query, no explanations.
 The query should be safe, read-only, and properly formatted.
 """
         
-        try:
+            logger.info("Calling OpenAI API for SQL generation...")
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -69,13 +190,17 @@ The query should be safe, read-only, and properly formatted.
                 max_tokens=500
             )
             
+            logger.info("OpenAI API call successful")
             sql_query = response.choices[0].message.content.strip()
             sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
             
             logger.info(f"Generated SQL: {sql_query}")
             
+            logger.info("Executing SQL query...")
             results = self.db.execute_query_dict(sql_query)
+            logger.info(f"Query returned {len(results)} results")
             
+            logger.info("Generating explanation...")
             explanation = self._generate_explanation(user_query, sql_query, results)
             
             return {

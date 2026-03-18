@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import timedelta
-from src import config
+import config
 from src.api.models import (
     LoginRequest, Token, User, VulnerabilityMetric, OrganizationMetric,
     ReporterMetric, TimeTrend, SeverityAnalysis, NLPQueryRequest, NLPQueryResponse

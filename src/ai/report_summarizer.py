@@ -1,5 +1,5 @@
 from openai import OpenAI
-from src import config
+import config
 from src.database.connection import DatabaseConnection
 import logging
 

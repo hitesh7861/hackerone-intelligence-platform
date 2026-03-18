@@ -117,6 +117,31 @@ st.markdown("""
         display: none !important;
     }
     
+    /* Chat Messages - Ensure full visibility */
+    [data-testid="stChatMessageContainer"] {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    [data-testid="stChatMessage"] {
+        max-height: none !important;
+        overflow: visible !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Code blocks in chat */
+    [data-testid="stChatMessage"] pre {
+        max-height: none !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+    }
+    
+    /* DataFrames in chat */
+    [data-testid="stChatMessage"] [data-testid="stDataFrame"] {
+        max-height: 400px !important;
+        overflow: auto !important;
+    }
+    
     /* Headers */
     h1 {
         color: #ffffff;
@@ -212,6 +237,141 @@ st.markdown("""
     ::-webkit-scrollbar-thumb:hover {
         background: #404040;
     }
+    
+    /* Fix chat container and input responsiveness */
+    .main .block-container {
+        max-height: calc(100vh - 100px) !important;
+        overflow-y: auto !important;
+        padding-bottom: 100px !important;
+    }
+    
+    [data-testid="stChatInput"] {
+        position: sticky !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: #0a0a0a !important;
+        padding: 10px 0 !important;
+        z-index: 100 !important;
+    }
+    
+    [data-testid="stChatInput"] > div {
+        width: 100% !important;
+    }
+    
+    /* Chat message container */
+    [data-testid="stChatMessageContainer"] {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    /* Floating AI Chatbot Button */
+    .floating-chat-button {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+    
+    .floating-chat-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+            box-shadow: 0 4px 30px rgba(102, 126, 234, 0.7);
+        }
+    }
+    
+    .chat-icon {
+        font-size: 28px;
+        color: white;
+    }
+    
+    .chat-tooltip {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        background: #1a1a1a;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        white-space: nowrap;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Chat Widget Container */
+    .chat-widget {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        width: 400px;
+        height: 600px;
+        background: #0a0a0a;
+        border: 1px solid #333;
+        border-radius: 12px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    
+    .chat-widget-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 16px 20px;
+        color: white;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .chat-widget-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    
+    .close-chat {
+        cursor: pointer;
+        font-size: 20px;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    
+    .close-chat:hover {
+        opacity: 1;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -249,10 +409,41 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # Refresh Data Button
+    if st.button("🔄 Refresh Data", key="refresh-data", use_container_width=True, help="Reload data from HackerOne dataset"):
+        with st.spinner("Refreshing data... This may take a few minutes."):
+            try:
+                import subprocess
+                import sys
+                
+                # Run the pipeline
+                result = subprocess.run(
+                    [sys.executable, "run_pipeline.py"],
+                    cwd="/Users/hiteshkumar/hackerone/hackerone-intelligence-platform",
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minute timeout
+                )
+                
+                if result.returncode == 0:
+                    st.success("✅ Data refreshed successfully!")
+                    st.info("Please refresh your browser to see the updated data.")
+                    # Clear cache to force reload
+                    st.cache_resource.clear()
+                else:
+                    st.error(f"❌ Error refreshing data: {result.stderr[:500]}")
+            except subprocess.TimeoutExpired:
+                st.error("❌ Refresh timed out. Please try again or run manually: `python run_pipeline.py`")
+            except Exception as e:
+                st.error(f"❌ Error: {str(e)}")
+    
+    st.markdown("---")
+    
+    # Simple navigation - AI Assistant at bottom with icon
     page = st.radio(
         "Navigation",
         ["Dashboard", "Security Threats", "Companies", "Researchers", 
-         "Timeline & Patterns", "Intelligence Reports", "AI Assistant", "Knowledge Base", "Search & Export"],
+         "Timeline & Patterns", "Intelligence Reports", "Knowledge Base", "Search & Export", "🤖 AI Assistant"],
         label_visibility="collapsed"
     )
     
@@ -272,6 +463,7 @@ with st.sidebar:
         st.metric("Total Reports", f"{int(stats['reports']):,}")
         st.metric("Organizations", f"{int(stats['orgs']):,}")
         st.metric("Researchers", f"{int(stats['researchers']):,}")
+        
     except:
         pass
 
@@ -539,8 +731,15 @@ elif page == "Intelligence Reports":
         5. Engage actively with the security community
         """)
 
-elif page == "AI Assistant":
-    st.title("AI-Powered Assistant")
+elif page == "🤖 AI Assistant":
+    # Header with clear button
+    col1, col2 = st.columns([0.85, 0.15])
+    with col1:
+        st.title("AI-Powered Assistant")
+    with col2:
+        if st.button("🗑️ Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+            st.session_state.messages = []
+            st.rerun()
     
     if not config.AI_ENABLED:
         st.warning("AI features require OpenAI API key. Configure it in your .env file.")
@@ -565,19 +764,56 @@ elif page == "AI Assistant":
                     try:
                         from src.ai.nlp_query import NLPQueryEngine
                         nlp_engine = NLPQueryEngine()
-                        result = nlp_engine.process_query(prompt, user_role="admin")
+                        current_user = {"role": "admin", "organization": None}
+                        # Pass conversation history for context
+                        result = nlp_engine.process_query(prompt, current_user, st.session_state.messages[:-1])
                         
-                        if result['success']:
-                            st.markdown(f"**Query:** `{result['sql']}`")
-                            st.dataframe(result['data'], use_container_width=True)
-                            response = f"Found {len(result['data'])} results."
+                        full_response = ""
+                        
+                        if result.get('sql_generated'):
+                            st.markdown(f"**SQL Query:**")
+                            st.code(result['sql_generated'], language='sql')
+                            full_response += f"**SQL Query:**\n```sql\n{result['sql_generated']}\n```\n\n"
+                            
+                            if result.get('results') and len(result['results']) > 0:
+                                st.markdown(f"**Results:** {len(result['results'])} rows found")
+                                import pandas as pd
+                                df_results = pd.DataFrame(result['results'])
+                                
+                                # Dynamic height based on number of rows
+                                num_rows = len(df_results)
+                                if num_rows == 1:
+                                    table_height = 100
+                                elif num_rows <= 5:
+                                    table_height = 200
+                                elif num_rows <= 10:
+                                    table_height = 300
+                                else:
+                                    table_height = 400
+                                
+                                st.dataframe(df_results, use_container_width=True, height=table_height)
+                                
+                                summary = result.get('explanation', 'Query executed successfully.')
+                                st.markdown(f"**Summary:** {summary}")
+                                
+                                full_response += f"**Results:** {len(result['results'])} rows found\n\n"
+                                full_response += f"**Summary:** {summary}"
+                            else:
+                                st.info("No results found for your query.")
+                                explanation = result.get('explanation', 'The query executed successfully but returned no data.')
+                                st.markdown(f"**Explanation:** {explanation}")
+                                
+                                full_response += f"No results found.\n\n**Explanation:** {explanation}"
                         else:
-                            response = f"Error: {result.get('error', 'Unknown error')}"
+                            error_msg = result.get('explanation', 'Error processing query.')
+                            st.error(error_msg)
+                            full_response = f"Error: {error_msg}"
                         
-                        st.markdown(response)
-                        st.session_state.messages.append({"role": "assistant", "content": response})
+                        st.session_state.messages.append({"role": "assistant", "content": full_response})
                     except Exception as e:
-                        st.error(f"Error: {str(e)}")
+                        error_msg = f"Error: {str(e)}"
+                        st.error(error_msg)
+                        st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
 elif page == "Knowledge Base":
     st.title("Security Knowledge Base")
@@ -720,3 +956,4 @@ elif page == "Search & Export":
     )
     
     st.dataframe(df, use_container_width=True, height=600)
+
