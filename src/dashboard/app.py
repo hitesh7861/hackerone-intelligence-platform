@@ -220,6 +220,18 @@ st.markdown("""
         background-color: transparent !important;
     }
     
+    /* Alert boxes - Remove background */
+    .stAlert {
+        background-color: transparent !important;
+        border: none !important;
+        padding: 0.5rem 0 !important;
+    }
+    
+    [data-testid="stAlert"] {
+        background-color: transparent !important;
+        border: none !important;
+    }
+    
     /* Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
