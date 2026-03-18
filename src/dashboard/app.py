@@ -429,29 +429,14 @@ with st.sidebar:
     if st.button("🔄 Refresh Data", key="refresh-data", use_container_width=True, help="Reload data from HackerOne dataset"):
         with st.spinner("Refreshing data... This may take a few minutes."):
             try:
-                import subprocess
-                import sys
-                
-                # Run the pipeline
-                result = subprocess.run(
-                    [sys.executable, "run_pipeline.py"],
-                    cwd="/Users/hiteshkumar/hackerone/hackerone-intelligence-platform",
-                    capture_output=True,
-                    text=True,
-                    timeout=300  # 5 minute timeout
-                )
-                
-                if result.returncode == 0:
-                    st.success("✅ Data refreshed successfully!")
-                    st.info("Please refresh your browser to see the updated data.")
-                    # Clear cache to force reload
-                    st.cache_resource.clear()
-                else:
-                    st.error(f"❌ Error refreshing data: {result.stderr[:500]}")
-            except subprocess.TimeoutExpired:
-                st.error("❌ Refresh timed out. Please try again or run manually: `python run_pipeline.py`")
+                from src.elt.pipeline import ELTPipeline
+                pipeline = ELTPipeline()
+                pipeline.run_full_pipeline()
+                st.success("✅ Data refreshed successfully!")
+                st.cache_resource.clear()
+                st.rerun()
             except Exception as e:
-                st.error(f"❌ Error: {str(e)}")
+                st.error(f"❌ Error refreshing data: {str(e)}")
     
     st.markdown("---")
     
