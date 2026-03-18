@@ -102,8 +102,18 @@ class NLPQueryEngine:
                 content = msg.get('content', '')[:200]  # Truncate long messages
                 conversation_context += f"{role}: {content}\n"
         
-        # Classify query type: conversation, insight, or data_query
-        classification_prompt = f"""Classify this user message into ONE of these categories:
+        # Pre-check for explicit keywords to force classification
+        query_lower = user_query.lower()
+        explicit_data_keywords = ['table', 'list', 'sql', 'query', 'export', 'download', 'show table', 'give me a list', 'show me a table']
+        has_explicit_keyword = any(keyword in query_lower for keyword in explicit_data_keywords)
+        
+        # If no explicit keywords, default to insight mode
+        if not has_explicit_keyword and not any(greeting in query_lower for greeting in ['hello', 'hi', 'hey', 'thanks', 'thank you']):
+            logger.info("No explicit data keywords found - defaulting to insight mode")
+            query_type = "insight"
+        else:
+            # Classify query type: conversation, insight, or data_query
+            classification_prompt = f"""Classify this user message into ONE of these categories:
 
 Current user message: "{user_query}"
 
@@ -151,20 +161,25 @@ Rules:
 
 Respond with ONLY one word: conversation, insight, or data_query"""
 
+            try:
+                logger.info("Classifying query type...")
+                classification = self.client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "You are a precise query classifier. Respond with ONLY one word: 'conversation', 'insight', or 'data_query'."},
+                        {"role": "user", "content": classification_prompt}
+                    ],
+                    temperature=0,
+                    max_tokens=10
+                )
+                
+                query_type = classification.choices[0].message.content.strip().lower()
+                logger.info(f"Query classified as: {query_type}")
+            except Exception as e:
+                logger.error(f"Classification error: {e}")
+                query_type = "insight"  # Default to insight on error
+        
         try:
-            logger.info("Classifying query type...")
-            classification = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a precise query classifier. Respond with ONLY one word: 'conversation', 'insight', or 'data_query'."},
-                    {"role": "user", "content": classification_prompt}
-                ],
-                temperature=0,
-                max_tokens=10
-            )
-            
-            query_type = classification.choices[0].message.content.strip().lower()
-            logger.info(f"Query classified as: {query_type}")
             
             # Handle conversational queries
             if query_type == "conversation":
