@@ -12,9 +12,25 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 from src.database.connection import DatabaseConnection
 from src import config
 
-# Check if database exists, if not run pipeline
+# Check if database exists and has data, if not run pipeline
 db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
+needs_setup = False
+
 if not db_path.exists():
+    needs_setup = True
+else:
+    # Check if tables exist
+    try:
+        import duckdb
+        conn = duckdb.connect(str(db_path), read_only=True)
+        result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
+        conn.close()
+        if result[0] == 0:
+            needs_setup = True
+    except:
+        needs_setup = True
+
+if needs_setup:
     st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
     with st.spinner("Loading data..."):
         try:
