@@ -102,16 +102,25 @@ class NLPQueryEngine:
                 content = msg.get('content', '')[:200]  # Truncate long messages
                 conversation_context += f"{role}: {content}\n"
         
-        # Pre-check for explicit keywords to force classification
+        # Keyword-based classification (skip AI for most questions)
         query_lower = user_query.lower()
-        explicit_data_keywords = ['table', 'list', 'sql', 'query', 'export', 'download', 'show table', 'give me a list', 'show me a table']
-        has_explicit_keyword = any(keyword in query_lower for keyword in explicit_data_keywords)
         
-        # If no explicit keywords, default to insight mode
-        if not has_explicit_keyword and not any(greeting in query_lower for greeting in ['hello', 'hi', 'hey', 'thanks', 'thank you']):
-            logger.info("No explicit data keywords found - defaulting to insight mode")
-            query_type = "insight"
+        # Check for greetings
+        greetings = ['hello', 'hi', 'hey', 'thanks', 'thank you', 'good morning', 'good afternoon']
+        if any(greeting in query_lower for greeting in greetings):
+            logger.info("Greeting detected - using conversation mode")
+            query_type = "conversation"
+        # Check for explicit data request keywords
+        elif any(keyword in query_lower for keyword in ['show me a table', 'give me a table', 'show table', 'list all', 'give me a list', 'show me the sql', 'sql query', 'export', 'download']):
+            logger.info("Explicit data request keywords detected - using data_query mode")
+            query_type = "data_query"
+        # Default to insight mode for everything else
         else:
+            logger.info("No special keywords - defaulting to insight mode for conversational analysis")
+            query_type = "insight"
+        
+        # Skip AI classification entirely
+        if False:
             # Classify query type: conversation, insight, or data_query
             classification_prompt = f"""Classify this user message into ONE of these categories:
 
