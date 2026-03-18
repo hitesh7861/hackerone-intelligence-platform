@@ -20,7 +20,7 @@ if not db_path.exists():
         try:
             from src.elt.pipeline import ELTPipeline
             pipeline = ELTPipeline()
-            pipeline.run()
+            pipeline.run_full_pipeline()
             st.success("✅ Data loaded successfully!")
             st.rerun()
         except Exception as e:
