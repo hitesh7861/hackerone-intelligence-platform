@@ -102,37 +102,34 @@ class NLPQueryEngine:
                 content = msg.get('content', '')[:200]  # Truncate long messages
                 conversation_context += f"{role}: {content}\n"
         
-        # First, check if this is a conversational query or a data query
-        classification_prompt = f"""Classify this user message as either 'conversation' or 'data_query':
+        # Classify query type: conversation, insight, or data_query
+        classification_prompt = f"""Classify this user message into ONE of these categories:
 
 Current user message: "{user_query}"
 
-CONVERSATION examples:
-- "hello", "hi", "hey there"
-- "thank you", "thanks"
-- "what is this dashboard about?"
-- "what can you help me with?"
-- "what does the Security Threats tab do?"
-- "how do I use this platform?"
-- "what features are available?"
+Categories:
+1. 'conversation' - Greetings, thanks, platform questions
+   Examples: "hello", "what is this dashboard?", "how can you help?"
 
-DATA_QUERY examples:
-- "how many XSS vulnerabilities are there?"
-- "show me top 10 organizations"
-- "what's the average bounty rate?"
-- "list all critical vulnerabilities"
+2. 'insight' - General questions seeking understanding/insights (answer with analysis, not raw data)
+   Examples: "what vulnerabilities are there?", "what kind of data do you have?", "tell me about security trends", "what are common threats?"
 
-If the message is a greeting, thanks, or asks about the platform/dashboard/features/tabs, respond: conversation
-If the message asks for specific data, counts, statistics, or trends from the database, respond: data_query
+3. 'data_query' - Specific requests for exact numbers, lists, or tables
+   Examples: "show me exactly how many XSS", "list top 10 organizations", "give me a table of critical vulns"
 
-Respond with ONLY one word: conversation or data_query"""
+Rules:
+- If asking WHAT/WHY/TELL ME ABOUT → 'insight' (provide analysis)
+- If asking SHOW ME/LIST/HOW MANY EXACTLY → 'data_query' (provide SQL + table)
+- If greeting or platform question → 'conversation'
+
+Respond with ONLY one word: conversation, insight, or data_query"""
 
         try:
             logger.info("Classifying query type...")
             classification = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a precise query classifier. Analyze the user's message and respond with ONLY 'conversation' or 'data_query'. Greetings and platform questions are ALWAYS 'conversation'."},
+                    {"role": "system", "content": "You are a precise query classifier. Respond with ONLY one word: 'conversation', 'insight', or 'data_query'."},
                     {"role": "user", "content": classification_prompt}
                 ],
                 temperature=0,
@@ -177,7 +174,6 @@ You can help users understand the platform or query the vulnerability data."""
                     }
                 except Exception as conv_error:
                     logger.error(f"Error in conversational response: {conv_error}")
-                    # Fallback to simple response
                     return {
                         "query": user_query,
                         "sql_generated": None,
@@ -185,7 +181,79 @@ You can help users understand the platform or query the vulnerability data."""
                         "explanation": "Hello! I'm the AI assistant for the HackerOne Intelligence Platform. I can help you explore vulnerability data or answer questions about the platform. What would you like to know?"
                     }
             
-            # Handle data queries - generate SQL
+            # Handle insight queries - fetch data and provide conversational analysis
+            if query_type == "insight":
+                logger.info("Handling insight query - fetching data and generating analysis...")
+                
+                try:
+                    # First, generate SQL to get relevant data
+                    sql_prompt = f"""Generate a SQL query to fetch relevant data for this question: "{user_query}"
+
+{self.schema_context}
+
+Return ONLY the SQL query. Keep it simple and limit to 20 rows max."""
+                    
+                    sql_response = self.client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": "You are a SQL expert. Generate only valid DuckDB SQL queries."},
+                            {"role": "user", "content": sql_prompt}
+                        ],
+                        temperature=0.1,
+                        max_tokens=300
+                    )
+                    
+                    sql_query = sql_response.choices[0].message.content.strip()
+                    sql_query = sql_query.replace("```sql", "").replace("```", "").strip()
+                    logger.info(f"Generated SQL for insights: {sql_query}")
+                    
+                    # Execute query
+                    results = self.db.execute_query_dict(sql_query)
+                    logger.info(f"Query returned {len(results)} results")
+                    
+                    # Generate conversational analysis based on the data
+                    analysis_prompt = f"""Based on this data, provide a conversational, insightful answer to: "{user_query}"
+
+Data summary: {results[:5] if len(results) > 5 else results}
+Total records: {len(results)}
+
+Provide a paragraph-style response with:
+- Key insights and trends
+- Notable patterns or findings
+- Context and interpretation
+- Actionable takeaways if relevant
+
+Be conversational and helpful. Don't just list numbers - explain what they mean."""
+                    
+                    analysis_response = self.client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": "You are a security analyst providing insights. Be conversational, insightful, and explain trends in plain language."},
+                            {"role": "user", "content": analysis_prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=400
+                    )
+                    
+                    analysis_text = analysis_response.choices[0].message.content.strip()
+                    logger.info("Insight analysis generated successfully")
+                    
+                    return {
+                        "query": user_query,
+                        "sql_generated": None,  # Don't show SQL for insights
+                        "results": [],  # Don't show raw table
+                        "explanation": analysis_text
+                    }
+                except Exception as insight_error:
+                    logger.error(f"Error in insight generation: {insight_error}")
+                    return {
+                        "query": user_query,
+                        "sql_generated": None,
+                        "results": [],
+                        "explanation": "I can help you understand the vulnerability data. Could you rephrase your question or ask for specific details?"
+                    }
+            
+            # Handle data queries - generate SQL and show tables
             logger.info("Handling data query - generating SQL...")
             prompt = f"""You are a SQL expert for a vulnerability intelligence database.
         
