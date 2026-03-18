@@ -14,22 +14,39 @@ from src import config
 
 # Check if database exists and has data, if not run pipeline
 db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
-setup_complete_flag = Path(__file__).parent.parent.parent / "data" / ".setup_complete"
 needs_setup = False
 
-# Only run setup if flag file doesn't exist
-if not setup_complete_flag.exists():
+# Check if database exists and has data
+if not db_path.exists():
     needs_setup = True
+else:
+    # Check if database has data by querying fact_reports
+    try:
+        import duckdb
+        conn = duckdb.connect(str(db_path), read_only=True)
+        try:
+            result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
+            if result[0] == 0:
+                needs_setup = True
+        except:
+            # Table doesn't exist
+            needs_setup = True
+        finally:
+            conn.close()
+    except:
+        needs_setup = True
 
 if needs_setup:
     st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
     with st.spinner("Loading data..."):
         try:
+            # Delete existing database if it exists but is empty/corrupted
+            if db_path.exists():
+                db_path.unlink()
+            
             from src.elt.pipeline import ELTPipeline
             pipeline = ELTPipeline()
             pipeline.run_full_pipeline()
-            # Create flag file to indicate setup is complete
-            setup_complete_flag.touch()
             st.success("✅ Data loaded successfully!")
             st.rerun()
         except Exception as e:
