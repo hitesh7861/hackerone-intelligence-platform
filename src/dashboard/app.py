@@ -251,7 +251,7 @@ st.markdown("""
         bottom: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
-        background: #0a0a0a !important;
+        background: transparent !important;
         padding: 10px 0 !important;
         z-index: 100 !important;
     }
