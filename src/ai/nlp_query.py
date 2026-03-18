@@ -105,13 +105,25 @@ class NLPQueryEngine:
         # First, check if this is a conversational query or a data query
         classification_prompt = f"""Classify this user message as either 'conversation' or 'data_query':
 
-{conversation_context}
-
 Current user message: "{user_query}"
 
-Rules:
-- 'conversation': greetings (hi, hello, hey), thanks, casual chat, questions about the assistant itself, questions about the dashboard/platform features, what tabs do, how to use the platform
-- 'data_query': specific questions about vulnerability data, counts, statistics, trends that require querying the database
+CONVERSATION examples:
+- "hello", "hi", "hey there"
+- "thank you", "thanks"
+- "what is this dashboard about?"
+- "what can you help me with?"
+- "what does the Security Threats tab do?"
+- "how do I use this platform?"
+- "what features are available?"
+
+DATA_QUERY examples:
+- "how many XSS vulnerabilities are there?"
+- "show me top 10 organizations"
+- "what's the average bounty rate?"
+- "list all critical vulnerabilities"
+
+If the message is a greeting, thanks, or asks about the platform/dashboard/features/tabs, respond: conversation
+If the message asks for specific data, counts, statistics, or trends from the database, respond: data_query
 
 Respond with ONLY one word: conversation or data_query"""
 
@@ -120,7 +132,7 @@ Respond with ONLY one word: conversation or data_query"""
             classification = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a query classifier. Respond with only 'conversation' or 'data_query'."},
+                    {"role": "system", "content": "You are a precise query classifier. Analyze the user's message and respond with ONLY 'conversation' or 'data_query'. Greetings and platform questions are ALWAYS 'conversation'."},
                     {"role": "user", "content": classification_prompt}
                 ],
                 temperature=0,
