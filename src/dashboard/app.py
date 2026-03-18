@@ -5,11 +5,27 @@ from datetime import datetime
 import sys
 from pathlib import Path
 import base64
+import os
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from src.database.connection import DatabaseConnection
 from src import config
+
+# Check if database exists, if not run pipeline
+db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
+if not db_path.exists():
+    st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
+    with st.spinner("Loading data..."):
+        try:
+            from src.elt.pipeline import ELTPipeline
+            pipeline = ELTPipeline()
+            pipeline.run()
+            st.success("✅ Data loaded successfully!")
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Error loading data: {str(e)}")
+            st.stop()
 
 st.set_page_config(
     page_title="HackerOne Intelligence Platform",
