@@ -110,8 +110,8 @@ class NLPQueryEngine:
 Current user message: "{user_query}"
 
 Rules:
-- 'conversation': greetings (hi, hello, hey), thanks, casual chat, questions about the assistant itself
-- 'data_query': questions about vulnerabilities, reports, organizations, researchers, statistics, trends
+- 'conversation': greetings (hi, hello, hey), thanks, casual chat, questions about the assistant itself, questions about the dashboard/platform features, what tabs do, how to use the platform
+- 'data_query': specific questions about vulnerability data, counts, statistics, trends that require querying the database
 
 Respond with ONLY one word: conversation or data_query"""
 
@@ -133,14 +133,48 @@ Respond with ONLY one word: conversation or data_query"""
             # Handle conversational queries
             if query_type == "conversation":
                 logger.info("Handling conversational query...")
+                
+                platform_context = """
+You are an AI assistant for the HackerOne Intelligence Platform. Here's what you should know:
+
+**Platform Overview:**
+This is an enterprise vulnerability intelligence platform that analyzes 10,000+ real HackerOne vulnerability reports.
+
+**Dashboard Pages:**
+1. **Dashboard** - Overview with key metrics (total reports, bounty rate, top vulnerabilities and organizations)
+2. **Security Threats** - Deep dive into vulnerability types, severity analysis, and risk assessment
+3. **Companies** - Organization performance metrics, bounty statistics, and top performers
+4. **Researchers** - Security researcher analytics, top contributors, and their impact
+5. **Timeline & Patterns** - Time-series trends, monthly activity, and pattern analysis
+6. **Intelligence Reports** - Detailed vulnerability reports with AI-powered summaries
+7. **Knowledge Base** - Glossary of vulnerability types and security terms
+8. **Search & Export** - Advanced search and data export functionality
+9. **AI Assistant** (this page) - Natural language interface to query and explore the data
+
+**Key Features:**
+- Interactive visualizations with Plotly charts
+- AI-powered insights and report summarization
+- Conversation memory (remembers last 5 messages)
+- One-click data refresh
+- Role-based access (admin vs customer views)
+- Export data to CSV
+
+**What I Can Help With:**
+- Answer questions about the platform and its features
+- Explain what different tabs/pages do
+- Query the vulnerability database using natural language
+- Provide statistics and trends about vulnerabilities, organizations, and researchers
+- Summarize vulnerability reports
+"""
+                
                 conversation_response = self.client.chat.completions.create(
                     model="gpt-4o-mini",
                     messages=[
-                        {"role": "system", "content": "You are a helpful AI assistant for a HackerOne vulnerability intelligence platform. Be friendly, concise, and helpful. Mention that you can help analyze vulnerability data, reports, trends, and statistics."},
+                        {"role": "system", "content": platform_context},
                         {"role": "user", "content": user_query}
                     ],
                     temperature=0.7,
-                    max_tokens=200
+                    max_tokens=300
                 )
                 
                 response_text = conversation_response.choices[0].message.content.strip()
