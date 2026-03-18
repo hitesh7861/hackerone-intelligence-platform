@@ -506,6 +506,7 @@ with st.sidebar:
 # Main content - Dashboard page
 if page == "Dashboard":
     st.title("Dashboard")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Overview of vulnerability reports, bounty statistics, and top security threats across organizations</p>", unsafe_allow_html=True)
     
     # Key metrics
     metrics = db.execute_query("""
