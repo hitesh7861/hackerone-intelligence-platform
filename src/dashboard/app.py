@@ -16,19 +16,11 @@ from src import config
 db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
 needs_setup = False
 
+# Only run setup if explicitly needed (file doesn't exist)
 if not db_path.exists():
     needs_setup = True
-else:
-    # Check if tables exist
-    try:
-        import duckdb
-        conn = duckdb.connect(str(db_path), read_only=True)
-        result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
-        conn.close()
-        if result[0] == 0:
-            needs_setup = True
-    except:
-        needs_setup = True
+elif db_path.stat().st_size < 1000:  # Database file is too small (likely empty)
+    needs_setup = True
 
 if needs_setup:
     st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
@@ -41,6 +33,7 @@ if needs_setup:
             st.rerun()
         except Exception as e:
             st.error(f"❌ Error loading data: {str(e)}")
+            st.info("Try refreshing the page or contact support if the issue persists.")
             st.stop()
 
 st.set_page_config(
