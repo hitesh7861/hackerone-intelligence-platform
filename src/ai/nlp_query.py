@@ -108,19 +108,46 @@ class NLPQueryEngine:
 Current user message: "{user_query}"
 
 Categories:
-1. 'conversation' - Greetings, thanks, platform questions
-   Examples: "hello", "what is this dashboard?", "how can you help?"
 
-2. 'insight' - General questions seeking understanding/insights (answer with analysis, not raw data)
-   Examples: "what vulnerabilities are there?", "what kind of data do you have?", "tell me about security trends", "what are common threats?"
+1. 'conversation' - Greetings, thanks, platform/feature questions
+   Examples:
+   - "hello", "hi", "hey there", "good morning"
+   - "thank you", "thanks", "appreciate it"
+   - "what is this dashboard?", "what can you do?", "how can you help?"
+   - "what features are available?", "what pages are there?"
+   - "how do I use this platform?"
 
-3. 'data_query' - Specific requests for exact numbers, lists, or tables
-   Examples: "show me exactly how many XSS", "list top 10 organizations", "give me a table of critical vulns"
+2. 'insight' - DEFAULT for ALL data questions - provide natural language analysis
+   Examples:
+   - "what vulnerabilities are there?", "what kind of vulnerabilities exist?"
+   - "tell me about XSS", "explain SQL injection", "what is CSRF?"
+   - "what are common threats?", "what are the top security issues?"
+   - "how many XSS vulnerabilities?", "what's the count of critical bugs?"
+   - "what organizations are there?", "who are the top companies?"
+   - "what researchers are active?", "who reports the most?"
+   - "what's the average bounty?", "what are bounty trends?"
+   - "what severity levels exist?", "how severe are the issues?"
+   - "what data do you have?", "what can I analyze?"
+   - "tell me about trends", "what patterns do you see?"
+   - "what's happening with security?", "how is the landscape?"
+   - "compare XSS and SQLi", "which is more common?"
+   - "what about mobile vulnerabilities?", "web app issues?"
+
+3. 'data_query' - ONLY when EXPLICITLY requesting tables, lists, SQL, or exports
+   Examples:
+   - "show me a TABLE of XSS vulnerabilities"
+   - "LIST all organizations in a table"
+   - "give me the SQL query for this"
+   - "show me the exact SQL"
+   - "export this data", "download as CSV"
+   - "give me a LIST of all researchers"
+   - "show TABLE with bounty amounts"
+   Must contain keywords: "table", "list", "sql", "query", "export", "download", "show table", "give me a list"
 
 Rules:
-- If asking WHAT/WHY/TELL ME ABOUT → 'insight' (provide analysis)
-- If asking SHOW ME/LIST/HOW MANY EXACTLY → 'data_query' (provide SQL + table)
-- If greeting or platform question → 'conversation'
+- DEFAULT to 'insight' for 95% of questions (conversational analysis)
+- ONLY use 'data_query' if explicitly contains: "table", "list", "sql", "query", "export"
+- Use 'conversation' ONLY for greetings and platform questions
 
 Respond with ONLY one word: conversation, insight, or data_query"""
 
