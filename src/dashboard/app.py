@@ -272,13 +272,16 @@ st.markdown("""
         width: 100% !important;
     }
     
-    [data-testid="stChatInput"] input {
+    [data-testid="stChatInput"] input,
+    [data-testid="stChatInput"] textarea,
+    [data-testid="stChatInput"] div,
+    [data-testid="stChatInput"] > div > div {
         background-color: transparent !important;
-        border: 1px solid #404040 !important;
+        background: transparent !important;
     }
     
+    [data-testid="stChatInput"] input,
     [data-testid="stChatInput"] textarea {
-        background-color: transparent !important;
         border: 1px solid #404040 !important;
     }
     
