@@ -110,8 +110,14 @@ class NLPQueryEngine:
         if any(greeting in query_lower for greeting in greetings):
             logger.info("Greeting detected - using conversation mode")
             query_type = "conversation"
-        # Check for explicit data request keywords
-        elif any(keyword in query_lower for keyword in ['show me a table', 'give me a table', 'show table', 'list all', 'give me a list', 'show me the sql', 'sql query', 'export', 'download']):
+        # Check for explicit data request keywords - expanded list
+        elif any(keyword in query_lower for keyword in [
+            'show me a table', 'give me a table', 'show table', 'show me table',
+            'list all', 'give me a list', 'give me list', 'show me a list', 'show list',
+            'show me the sql', 'sql query', 'export', 'download',
+            'list of', 'show all', 'give me all', 'display all',
+            'can you give me', 'can you show me', 'can you list'
+        ]):
             logger.info("Explicit data request keywords detected - using data_query mode")
             query_type = "data_query"
         # Default to insight mode for everything else
@@ -263,27 +269,26 @@ Return ONLY the SQL query. Keep it simple and limit to 20 rows max."""
                     logger.info(f"Query returned {len(results)} results")
                     
                     # Generate conversational analysis based on the data
-                    analysis_prompt = f"""Based on this data, provide a conversational, insightful answer to: "{user_query}"
+                    analysis_prompt = f"""Based on this data, provide a CONCISE, focused answer to: "{user_query}"
 
-Data summary: {results[:5] if len(results) > 5 else results}
+Data summary: {results[:10] if len(results) > 10 else results}
 Total records: {len(results)}
 
-Provide a paragraph-style response with:
-- Key insights and trends
-- Notable patterns or findings
-- Context and interpretation
-- Actionable takeaways if relevant
+Provide a SHORT response (2-3 sentences max) with:
+- The most important finding or number
+- One key insight or pattern
+- Brief context if needed
 
-Be conversational and helpful. Don't just list numbers - explain what they mean."""
+Be direct and concise. Focus ONLY on what the user asked. Avoid unnecessary details."""
                     
                     analysis_response = self.client.chat.completions.create(
                         model="gpt-4o-mini",
                         messages=[
-                            {"role": "system", "content": "You are a security analyst providing insights. Be conversational, insightful, and explain trends in plain language."},
+                            {"role": "system", "content": "You are a security analyst. Provide CONCISE, focused answers. Keep responses under 3 sentences. Be direct and answer only what was asked."},
                             {"role": "user", "content": analysis_prompt}
                         ],
-                        temperature=0.7,
-                        max_tokens=600
+                        temperature=0.5,
+                        max_tokens=300
                     )
                     
                     analysis_text = analysis_response.choices[0].message.content.strip()
