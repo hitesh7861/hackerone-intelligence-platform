@@ -517,8 +517,8 @@ with st.sidebar:
 
 # Main content - Dashboard page
 if page == "Dashboard":
-    st.title("Dashboard")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Overview of vulnerability reports, bounty statistics, and top security threats across organizations</p>", unsafe_allow_html=True)
+    st.title("Executive Overview")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Real-time intelligence on vulnerability landscape, bounty economics, and threat distribution across 10,000+ security reports</p>", unsafe_allow_html=True)
     
     # Key metrics
     metrics = db.execute_query("""
@@ -613,8 +613,8 @@ if page == "Dashboard":
 
 # Import remaining pages from backup
 elif page == "Security Threats":
-    st.title("Security Threats Analysis")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Detailed analysis of vulnerability types, severity distribution, and emerging security threats</p>", unsafe_allow_html=True)
+    st.title("Vulnerability Analysis")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comprehensive breakdown of vulnerability types, severity patterns, and bounty economics by threat category</p>", unsafe_allow_html=True)
     
     vuln_df = db.execute_query("""
         SELECT * FROM vw_vulnerability_metrics
@@ -640,8 +640,8 @@ elif page == "Security Threats":
     )
 
 elif page == "Companies":
-    st.title("Company Performance")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Organization-level metrics including report volumes, bounty payments, and security program effectiveness</p>", unsafe_allow_html=True)
+    st.title("Organization Metrics")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Performance benchmarking: report volume, bounty rates, and program effectiveness across participating organizations</p>", unsafe_allow_html=True)
     
     org_df = db.execute_query("""
         SELECT * FROM vw_organization_metrics
@@ -667,8 +667,8 @@ elif page == "Companies":
     )
 
 elif page == "Researchers":
-    st.title("Researcher Performance")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Top security researchers ranked by report submissions, bounty earnings, and impact contributions</p>", unsafe_allow_html=True)
+    st.title("Reporter Analytics")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Community performance metrics: volume vs. quality analysis, top contributors, and researcher engagement patterns</p>", unsafe_allow_html=True)
     
     researcher_df = db.execute_query("""
         SELECT * FROM vw_reporter_metrics
@@ -694,8 +694,8 @@ elif page == "Researchers":
     )
 
 elif page == "Timeline & Patterns":
-    st.title("Timeline & Pattern Analysis")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Temporal trends in vulnerability reporting, seasonal patterns, and disclosure timeline analytics</p>", unsafe_allow_html=True)
+    st.title("Trends & Narrative")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Historical trends, growth patterns, and market evolution: vulnerability landscape changes over time with strategic insights</p>", unsafe_allow_html=True)
     
     trend_df = db.execute_query("""
         SELECT * FROM vw_time_trends
@@ -721,8 +721,8 @@ elif page == "Timeline & Patterns":
     st.plotly_chart(fig, use_container_width=True)
 
 elif page == "Intelligence Reports":
-    st.title("Intelligence Reports")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Executive summaries, threat intelligence insights, and strategic security recommendations</p>", unsafe_allow_html=True)
+    st.title("Insights & Recommendations")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Data-driven insights, strategic recommendations, and actionable intelligence for security program optimization</p>", unsafe_allow_html=True)
     
     st.subheader("Top Security Threats")
     
@@ -871,8 +871,8 @@ elif page == "🤖 AI Assistant":
                         st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
 elif page == "Knowledge Base":
-    st.title("Security Knowledge Base")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comprehensive glossary of vulnerability types, attack vectors, and security concepts with real-world examples</p>", unsafe_allow_html=True)
+    st.title("Glossary & Definitions")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Technical reference: vulnerability classifications, metric definitions, and industry-standard security terminology</p>", unsafe_allow_html=True)
     
     st.markdown("Comprehensive glossary of common vulnerability types and security concepts.")
     
@@ -960,8 +960,8 @@ elif page == "Knowledge Base":
     """)
 
 elif page == "Search & Export":
-    st.title("Search & Export Data")
-    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Advanced search capabilities and data export tools for custom analysis and reporting</p>", unsafe_allow_html=True)
+    st.title("Data Explorer")
+    st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Advanced filtering, search capabilities, and export functionality for custom analysis and executive reporting</p>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
     
