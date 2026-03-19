@@ -272,17 +272,19 @@ st.markdown("""
         width: 100% !important;
     }
     
+    [data-testid="stChatInput"] *,
     [data-testid="stChatInput"] input,
     [data-testid="stChatInput"] textarea,
-    [data-testid="stChatInput"] div,
-    [data-testid="stChatInput"] > div > div {
+    [data-testid="stChatInput"] div {
         background-color: transparent !important;
         background: transparent !important;
+        background-image: none !important;
     }
     
     [data-testid="stChatInput"] input,
     [data-testid="stChatInput"] textarea {
         border: 1px solid #404040 !important;
+        color: #ffffff !important;
     }
     
     /* Chat message container */
@@ -401,37 +403,45 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Check if database exists and has data, if not run pipeline
-db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
-needs_setup = False
+# Check if database exists and has data, if not run pipeline (only once per session)
+if 'db_checked' not in st.session_state:
+    st.session_state.db_checked = False
 
-# Check if database exists and has data
-if not db_path.exists():
-    needs_setup = True
-else:
-    # Check if database has data and views by querying fact_reports and views
-    try:
-        import duckdb
-        conn = duckdb.connect(str(db_path), read_only=True)
-        try:
-            # Check if fact_reports table exists and has data
-            result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
-            if result[0] == 0:
-                needs_setup = True
-            else:
-                # Check if views exist (pipeline completed)
-                try:
-                    conn.execute("SELECT COUNT(*) FROM vw_organization_metrics").fetchone()
-                except:
-                    # Views don't exist, pipeline didn't complete
-                    needs_setup = True
-        except:
-            # Table doesn't exist
-            needs_setup = True
-        finally:
-            conn.close()
-    except:
+if not st.session_state.db_checked:
+    db_path = Path(__file__).parent.parent.parent / "data" / "hackerone.duckdb"
+    needs_setup = False
+
+    # Check if database exists and has data
+    if not db_path.exists():
         needs_setup = True
+    else:
+        # Check if database has data and views by querying fact_reports and views
+        try:
+            import duckdb
+            conn = duckdb.connect(str(db_path), read_only=True)
+            try:
+                # Check if fact_reports table exists and has data
+                result = conn.execute("SELECT COUNT(*) FROM fact_reports").fetchone()
+                if result[0] == 0:
+                    needs_setup = True
+                else:
+                    # Check if views exist (pipeline completed)
+                    try:
+                        conn.execute("SELECT COUNT(*) FROM vw_organization_metrics").fetchone()
+                    except:
+                        # Views don't exist, pipeline didn't complete
+                        needs_setup = True
+            except:
+                # Table doesn't exist
+                needs_setup = True
+            finally:
+                conn.close()
+        except:
+            needs_setup = True
+    
+    st.session_state.db_checked = True
+else:
+    needs_setup = False
 
 if needs_setup:
     st.info("🔄 First time setup: Downloading and processing HackerOne dataset... This takes 2-5 minutes.")
