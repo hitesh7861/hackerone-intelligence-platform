@@ -272,6 +272,16 @@ st.markdown("""
         width: 100% !important;
     }
     
+    [data-testid="stChatInput"] input {
+        background-color: transparent !important;
+        border: 1px solid #404040 !important;
+    }
+    
+    [data-testid="stChatInput"] textarea {
+        background-color: transparent !important;
+        border: 1px solid #404040 !important;
+    }
+    
     /* Chat message container */
     [data-testid="stChatMessageContainer"] {
         max-height: none !important;
