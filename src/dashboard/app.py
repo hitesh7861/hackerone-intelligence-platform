@@ -272,23 +272,33 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Force remove blue background from chat input */
-    [data-testid="stChatInput"] {
+    /* Force remove blue background from chat input - nuclear option */
+    section[data-testid="stChatInput"],
+    [data-testid="stChatInput"],
+    [data-testid="stChatInput"]::before,
+    [data-testid="stChatInput"]::after {
         background-color: #0a0a0a !important;
         background: #0a0a0a !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
     [data-testid="stChatInput"] *,
     [data-testid="stChatInput"] div,
     [data-testid="stChatInput"] > div,
     [data-testid="stChatInput"] > div > div,
+    [data-testid="stChatInput"] > div > div > div,
     [data-testid="stChatInput"] form,
-    [data-testid="stChatInput"] form > div,
-    [data-testid="stChatInput"] [class*="st-"] {
+    [data-testid="stChatInput"] form *,
+    [data-testid="stChatInput"] [class*="st-"],
+    [data-testid="stChatInput"] [class*="css-"] {
         background-color: #0a0a0a !important;
         background: #0a0a0a !important;
         background-image: none !important;
         box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
     [data-testid="stChatInput"] input,
