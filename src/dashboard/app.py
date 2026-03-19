@@ -272,16 +272,19 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Remove ALL backgrounds from chat input */
-    [data-testid="stChatInput"],
+    /* Force remove blue background from chat input */
+    [data-testid="stChatInput"] {
+        background-color: #0a0a0a !important;
+        background: #0a0a0a !important;
+    }
+    
     [data-testid="stChatInput"] *,
-    [data-testid="stChatInput"] input,
-    [data-testid="stChatInput"] textarea,
     [data-testid="stChatInput"] div,
     [data-testid="stChatInput"] > div,
     [data-testid="stChatInput"] > div > div,
     [data-testid="stChatInput"] form,
-    [data-testid="stChatInput"] form > div {
+    [data-testid="stChatInput"] form > div,
+    [data-testid="stChatInput"] [class*="st-"] {
         background-color: #0a0a0a !important;
         background: #0a0a0a !important;
         background-image: none !important;
@@ -290,9 +293,10 @@ st.markdown("""
     
     [data-testid="stChatInput"] input,
     [data-testid="stChatInput"] textarea {
+        background-color: #1a1a1a !important;
+        background: #1a1a1a !important;
         border: 1px solid #404040 !important;
         color: #ffffff !important;
-        background-color: #1a1a1a !important;
     }
     
     /* Chat message container */
