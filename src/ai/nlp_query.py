@@ -31,55 +31,51 @@ class NLPQueryEngine:
         self.schema_context = """
         Database: DuckDB
         
-        Tables:
-        1. fact_reports: Main fact table with report details
-           - id (VARCHAR): Unique report identifier
-           - created_at (TIMESTAMP): Report creation date
-           - disclosed_at (TIMESTAMP): Report disclosure date
-           - weakness_id (VARCHAR): Foreign key to dim_vulnerabilities
-           - reporter_username (VARCHAR): Reporter username
-           - team_handle (VARCHAR): Foreign key to dim_organizations
-           - severity_rating (VARCHAR): Severity level (e.g., 'critical', 'high', 'medium', 'low')
-           - severity_score (DOUBLE): Numeric severity score
-           - bounty_amount (DOUBLE): Bounty amount in USD
-           - has_bounty (BOOLEAN): Whether bounty was awarded
-           - vote_count (INTEGER): Number of votes
+        IMPORTANT: Always use the pre-aggregated VIEWS for queries, NOT the raw tables!
         
-        2. dim_vulnerabilities: Vulnerability dimension
-           - weakness_id (VARCHAR): Primary key
+        Available Business Views (USE THESE):
+        
+        1. vw_vulnerability_metrics - Vulnerability statistics
            - weakness_name (VARCHAR): Vulnerability type name
+           - total_reports (INTEGER): Total number of reports
+           - bounty_reports (INTEGER): Number of reports with bounties
+           - avg_votes (DOUBLE): Average votes per report
+           - bounty_rate (DOUBLE): Percentage of reports with bounties (0-100)
         
-        3. dim_organizations: Organization dimension
-           - team_handle (VARCHAR): Primary key
+        2. vw_organization_metrics - Organization statistics
+           - team_handle (VARCHAR): Organization identifier
            - team_name (VARCHAR): Organization name
+           - total_reports (INTEGER): Total reports for this org
+           - bounty_reports (INTEGER): Reports with bounties
+           - avg_votes (DOUBLE): Average votes
+           - bounty_rate (DOUBLE): Percentage with bounties (0-100)
            - first_report_date (TIMESTAMP): First report date
            - latest_report_date (TIMESTAMP): Latest report date
         
-        4. dim_researchers: Researcher dimension
-           - reporter_username (VARCHAR): Primary key
-           - total_reports (INTEGER): Total number of reports
+        3. vw_reporter_metrics - Reporter/researcher statistics
+           - reporter_username (VARCHAR): Reporter username
+           - reporter_name (VARCHAR): Reporter display name
+           - total_reports (INTEGER): Total reports
+           - bounty_reports (INTEGER): Reports with bounties
+           - avg_votes (DOUBLE): Average votes
+           - bounty_rate (DOUBLE): Percentage with bounties (0-100)
+           - first_report_date (TIMESTAMP): First report
+           - latest_report_date (TIMESTAMP): Latest report
         
-        IMPORTANT NOTES:
-        - To count researchers: Use COUNT(DISTINCT reporter_username) FROM fact_reports
-        - To count organizations: Use COUNT(DISTINCT team_handle) FROM fact_reports
-        - To count vulnerabilities: Use COUNT(DISTINCT weakness_id) FROM fact_reports
-        - The dim_* tables are for detailed info, but counts should come from fact_reports
+        4. vw_time_trends - Monthly trends
+           - month (TIMESTAMP): Month
+           - total_reports (INTEGER): Reports in month
+           - bounty_reports (INTEGER): Bounty reports
+           - active_organizations (INTEGER): Active orgs
+           - active_reporters (INTEGER): Active reporters
         
-        DuckDB Syntax Rules (IMPORTANT):
-        - Use TIMESTAMP type for dates (not DATETIME)
-        - Date difference: date_diff('day', date1, date2) or EXTRACT(day FROM date2 - date1)
-        - JOIN syntax: JOIN table_name ON condition (use proper ON keyword)
-        - String comparison is case-sensitive
-        - Use CAST() for type conversions
-        - Aggregate functions: COUNT(), SUM(), AVG(), MAX(), MIN()
-        - Always use proper table aliases in JOINs
-        
-        Example Queries:
-        - Total reports: SELECT COUNT(*) FROM fact_reports
-        - Total researchers: SELECT COUNT(DISTINCT reporter_username) FROM fact_reports
-        - Total organizations: SELECT COUNT(DISTINCT team_handle) FROM fact_reports
-        - With JOIN: SELECT o.team_name, COUNT(*) FROM fact_reports r JOIN dim_organizations o ON r.team_handle = o.team_handle GROUP BY o.team_name
-        - Date diff: SELECT AVG(date_diff('day', created_at, disclosed_at)) FROM fact_reports WHERE disclosed_at IS NOT NULL
+        Example Queries (COPY THESE PATTERNS):
+        - High bounty rate vulnerabilities: SELECT * FROM vw_vulnerability_metrics WHERE bounty_rate > 70 ORDER BY bounty_rate DESC LIMIT 10
+        - Top vulnerabilities: SELECT * FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 10
+        - Best organizations: SELECT * FROM vw_organization_metrics ORDER BY bounty_rate DESC LIMIT 10
+        - Top reporters: SELECT * FROM vw_reporter_metrics ORDER BY total_reports DESC LIMIT 10
+        - All vulnerabilities: SELECT * FROM vw_vulnerability_metrics ORDER BY total_reports DESC
+        - All organizations: SELECT * FROM vw_organization_metrics ORDER BY total_reports DESC
         """
     
     def process_query(self, user_query: str, current_user: dict, conversation_history: list = None):
@@ -105,21 +101,28 @@ class NLPQueryEngine:
         # Keyword-based classification (skip AI for most questions)
         query_lower = user_query.lower()
         
-        # Check for greetings
-        greetings = ['hello', 'hi', 'hey', 'thanks', 'thank you', 'good morning', 'good afternoon']
-        if any(greeting in query_lower for greeting in greetings):
-            logger.info("Greeting detected - using conversation mode")
-            query_type = "conversation"
-        # Check for explicit data request keywords - expanded list
-        elif any(keyword in query_lower for keyword in [
-            'show me a table', 'give me a table', 'show table', 'show me table',
-            'list all', 'give me a list', 'give me list', 'show me a list', 'show list',
-            'show me the sql', 'sql query', 'export', 'download',
-            'list of', 'show all', 'give me all', 'display all',
-            'can you give me', 'can you show me', 'can you list'
+        # Check for explicit data requests FIRST - highest priority
+        if any(keyword in query_lower for keyword in [
+            'show me', 'show all', 'list all', 'list the', 'give me', 'give all',
+            'display the', 'display all',
+            'which vulnerabilities', 'which organizations', 'which reporters', 'which',
+            'top 5', 'top 10', 'top vulnerabilities', 'top organizations',
+            'highest bounty', 'lowest bounty', 'best programs', 'worst programs', 'best security',
+            'find vulnerabilities', 'find organizations', 'find reporters',
+            'search for', 'get all', 'fetch all',
+            'how many vulnerabilities', 'how many organizations', 'how many reporters',
+            'vulnerabilities with', 'organizations with', 'reporters with'
         ]):
-            logger.info("Explicit data request keywords detected - using data_query mode")
+            logger.info("Explicit data request detected - using data_query mode")
             query_type = "data_query"
+        # Check for greetings and general questions (only if NOT a data query)
+        elif any(phrase in query_lower for phrase in [
+            'hello', 'hi', 'hey', 'thanks', 'thank you', 'good morning', 'good afternoon',
+            'what is this', 'what is the', 'tell me about', 'explain', 'how does',
+            'what does', 'can you tell', 'describe', 'what\'s this', 'whats this'
+        ]):
+            logger.info("Greeting or general question detected - using conversation mode")
+            query_type = "conversation"
         # Default to insight mode for everything else
         else:
             logger.info("No special keywords - defaulting to insight mode for conversational analysis")

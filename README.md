@@ -1,206 +1,269 @@
 # 🔒 HackerOne Intelligence Platform
 
-**Turn vulnerability data into actionable intelligence—with AI superpowers!**
+> Enterprise-grade vulnerability intelligence platform with AI-powered insights, RESTful API, and interactive dashboards.
 
-Welcome! This is an enterprise-grade platform that makes vulnerability intelligence accessible, actionable, and actually fun to explore. Whether you're a security analyst, data engineer, or just curious about bug bounty trends, you'll find something powerful here.
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red.svg)](https://streamlit.io/)
+[![DuckDB](https://img.shields.io/badge/DuckDB-0.9+-yellow.svg)](https://duckdb.org/)
 
-## What is this?
+## 🎯 Overview
 
-A complete intelligence platform for HackerOne vulnerability data featuring:
-- 📊 **Interactive dashboards** with real-time insights
-- 🤖 **AI-powered assistant** that answers questions in plain English
-- 🔐 **Secure API** with customer-specific data access
-- 📈 **Business analytics** for trends, patterns, and predictions
+A production-ready intelligence platform that transforms 10,000+ HackerOne vulnerability reports into actionable insights through:
 
-Built for HackerOne's Senior Data Engineer assignment, but designed like a real production system.
+- **🔐 Secure REST API** - JWT authentication with role-based access control
+- **🤖 AI Assistant** - Natural language queries with intelligent SQL generation
+- **📊 Interactive Dashboard** - Real-time analytics with 9 specialized pages
+- **⚡ High Performance** - DuckDB-powered analytics with <100ms response times
 
-## What can you do here?
-
-- 📊 **Explore the Data**: Dive into 10,000+ real vulnerability reports with interactive charts and filters
-- 🤖 **Chat with AI**: Ask questions like "Show me top XSS vulnerabilities" and get instant SQL-powered answers
-- 🔐 **Customer Portal**: Organizations can securely access only their data with role-based permissions
-- 📈 **Spot Trends**: See which vulnerabilities are hot, which orgs pay the most, and who the elite hackers are
-- 🔄 **Refresh Data**: One-click data refresh right from the dashboard
-- 🛠️ **Use the API**: RESTful endpoints with JWT auth for programmatic access
-
-## How it works
+## 🏗️ Architecture
 
 ```
 HuggingFace Dataset (10K+ reports)
+         ↓
+   ELT Pipeline
+         ↓
+   DuckDB Database
+         ↓
+    ┌────┴────┐
+    ↓         ↓
+REST API   Dashboard
+(FastAPI)  (Streamlit)
     ↓
-ELT Pipeline (Extract → Load → Transform)
-    ↓
-DuckDB (Fast, embedded analytics DB)
-    ↓
-    ├─→ REST API (FastAPI + JWT auth)
-    ├─→ AI Assistant (GPT-4o-mini)
-    └─→ Dashboard (Streamlit)
+AI Engine
+(GPT-4o-mini)
 ```
 
-**Tech Stack:** Python, FastAPI, Streamlit, DuckDB, OpenAI, Plotly
+**Tech Stack:** Python • FastAPI • Streamlit • DuckDB • OpenAI • Plotly • JWT
 
-**Want the deep dive?** Check out [ARCHITECTURE.md](docs/ARCHITECTURE.md) for design decisions and tradeoffs.
+## 🚀 Quick Start
 
-## How to get started
+### Prerequisites
+- Python 3.11+
+- OpenAI API key (optional, for AI features)
 
-**You'll need:** Python 3.11+ and a few minutes
+### Installation
 
-1. **Install what you need:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Load the data:**
-   ```bash
-   python run_pipeline.py
-   ```
-   This downloads 10K+ vulnerability reports from HuggingFace and sets up the database. Takes 2-5 minutes.
-
-3. **Fire up the dashboard:**
-   ```bash
-   python run_dashboard.py
-   ```
-   Opens at http://localhost:8501
-
-4. **(Optional) Enable AI features:**
-   ```bash
-   cp .env.example .env
-   # Add your OPENAI_API_KEY to .env
-   ```
-
-**That's it!** You're ready to explore.
-
-**Want the API instead?**
 ```bash
-python run_api.py  # API at http://localhost:8000/docs
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Load data (downloads 10K+ reports from HuggingFace)
+python run_pipeline.py
+
+# 3. Configure AI (optional)
+cp .env.example .env
+# Add OPENAI_API_KEY to .env
 ```
 
-## Dashboard Pages
+### Running the Platform
 
-- **Dashboard** - Key metrics and platform overview
-- **Security Threats** - Top vulnerabilities and risk analysis
-- **Companies** - Organization performance and bounty stats
-- **Researchers** - Top security researchers and their impact
-- **Timeline & Patterns** - Trends over time
-- **Intelligence Reports** - Detailed vulnerability reports
-- **🤖 AI Assistant** - Chat with AI about the data
-- **Knowledge Base** - Vulnerability glossary
-- **Search & Export** - Find and download specific reports
-
-## Using the API
-
-**1. Login:**
+**Dashboard (Streamlit)**
 ```bash
+python run_dashboard.py
+# → http://localhost:8501
+```
+
+**API Server (FastAPI)**
+```bash
+python run_api.py
+# → http://localhost:8000
+# → http://localhost:8000/docs (Swagger UI)
+```
+
+## 📊 Features
+
+### Dashboard (9 Pages)
+- **Executive Dashboard** - Comprehensive metrics and KPIs
+- **Threat Intelligence** - Vulnerability analysis and attack patterns
+- **Program Benchmarks** - Organization performance comparison
+- **Community Analytics** - Researcher statistics and trends
+- **Market Evolution** - Temporal trends and market dynamics
+- **Strategic Insights** - Detailed vulnerability intelligence
+- **Security Reference** - Vulnerability taxonomy and knowledge base
+- **Data Workbench** - Advanced search and data export
+- **AI Assistant** - Natural language query interface
+
+### REST API (15+ Endpoints)
+- **Authentication** - JWT-based login with role management
+- **Vulnerabilities** - CRUD operations with filtering
+- **Organizations** - Metrics and performance data
+- **Reporters** - Researcher statistics
+- **Trends** - Time-series and severity analysis
+- **AI Queries** - Natural language to SQL conversion
+- **Admin** - User management (admin-only)
+
+## 🔌 API Usage
+
+### Authentication
+
+```bash
+# Login
 curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "admin123"}'
+
+# Response: {"access_token": "eyJ...", "token_type": "bearer"}
 ```
 
-**2. Query data:**
+### Query Endpoints
+
 ```bash
+# Get all vulnerabilities
 curl "http://localhost:8000/api/v1/vulnerabilities" \
   -H "Authorization: Bearer YOUR_TOKEN"
-```
 
-**3. Ask AI (natural language):**
-```bash
+# Get specific vulnerability
+curl "http://localhost:8000/api/v1/vulnerabilities/SQL%20Injection" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# AI-powered query
 curl -X POST "http://localhost:8000/api/v1/query/nlp" \
-  -d '{"query": "Show me top 10 XSS vulnerabilities"}'
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Show me top 5 vulnerabilities"}'
 ```
 
-**Full API docs:** http://localhost:8000/docs
+**Interactive Docs:** http://localhost:8000/docs
 
-## Demo Logins
+## 🔑 Demo Accounts
 
-Try these accounts to see different views:
+| Username | Password | Role | Access |
+|----------|----------|------|--------|
+| `admin` | `admin123` | Admin | Full platform access |
+| `mailru` | `mailru123` | Customer | Mail.ru data only |
+| `shopify` | `shopify123` | Customer | Shopify data only |
 
-| Username | Password | What you'll see |
-|----------|----------|----------------|
-| `admin` | `admin123` | Everything - full platform access |
-| `mailru` | `mailru123` | Only Mail.ru's vulnerability data |
-| `shopify` | `shopify123` | Only Shopify's vulnerability data |
-| `gitlab` | `gitlab123` | Only GitLab's vulnerability data |
+## 🤖 AI Assistant
 
-## AI Superpowers 🤖
+### Intelligent Query Detection
 
-The AI Assistant can:
+The AI automatically distinguishes between data queries and conversational questions:
 
-**Chat in plain English:**
-- "How many XSS vulnerabilities are there?"
-- "Which org pays the most bounties?"
-- "Show me critical bugs from last year"
+**Data Queries** (returns SQL + results)
+```
+"Show me vulnerabilities with high bounty rates"
+"Which organizations have the best programs?"
+"Top 5 critical vulnerabilities"
+```
 
-**Summarize reports:**
-- One-line summaries of complex vulnerability reports
-- Risk assessment and business impact
-- Recommended actions
+**Conversational** (returns explanations)
+```
+"What is this platform?"
+"How does RBAC work?"
+"Explain the data model"
+```
 
-**Spot patterns:**
-- Emerging vulnerability trends
-- High-value bug predictions
-- Security recommendations
+### Features
+- **Smart Intent Detection** - Automatically routes to appropriate handler
+- **SQL Generation** - Converts natural language to DuckDB queries
+- **View-Aware** - Uses optimized business views (vw_*)
+- **Context Memory** - Remembers last 5 interactions
+- **RBAC Integration** - Respects user permissions in queries
 
-**Conversation memory:**
-- Remembers your last 5 questions
-- Handles follow-up questions naturally
-- Clear chat button to start fresh
+### Example Response
+```json
+{
+  "query": "Show me top 5 vulnerabilities",
+  "sql_generated": "SELECT * FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 5",
+  "results": [{"weakness_name": "XSS", "total_reports": 1234, ...}],
+  "explanation": "Found 5 vulnerabilities ordered by report count"
+}
+```
 
-**Note:** AI features need an OpenAI API key in `.env`. The platform works fine without it, just without the AI magic.
+**Note:** Requires `OPENAI_API_KEY` in `.env`
 
-## Project Layout
+## 📁 Project Structure
 
 ```
-hackerone-intelligence-platform/
 ├── src/
-│   ├── elt/              # Data pipeline (Extract → Load → Transform)
-│   ├── database/         # DuckDB schema and connections
-│   ├── api/              # FastAPI REST endpoints
-│   ├── ai/               # AI features (NLP, summarization, patterns)
-│   └── dashboard/        # Streamlit UI
+│   ├── api/
+│   │   ├── auth.py          # JWT authentication & RBAC
+│   │   ├── routes.py        # API endpoints
+│   │   ├── models.py        # Pydantic schemas
+│   │   └── main.py          # FastAPI app
+│   ├── ai/
+│   │   └── nlp_query.py     # AI query engine
+│   ├── dashboard/
+│   │   └── app.py           # Streamlit dashboard
+│   ├── elt/
+│   │   ├── extract.py       # Data extraction
+│   │   ├── load.py          # Data loading
+│   │   └── transform.py     # View creation
+│   └── database/
+│       ├── schema.py        # Database schema
+│       └── connection.py    # DuckDB connection
 ├── data/
-│   ├── raw/              # Downloaded CSV data
-│   └── hackerone.duckdb  # The database (created by pipeline)
+│   ├── raw/                 # Source CSV files
+│   └── hackerone.duckdb     # Analytics database
 ├── docs/
-│   └── ARCHITECTURE.md   # Deep dive into design decisions
-├── tests/                # Test suite
-├── run_pipeline.py       # Load the data
-├── run_api.py           # Start API server
-└── run_dashboard.py     # Start dashboard
+│   └── ARCHITECTURE.md      # Technical documentation
+├── run_pipeline.py          # Data pipeline runner
+├── run_api.py              # API server
+└── run_dashboard.py        # Dashboard server
 ```
 
-## Fun Facts & Insights
+## 🔒 Security
 
-- 🕵️ **Information Disclosure** is the most common vulnerability type
-- 💰 Some organizations pay bounties on **90%+** of their reports
-- 🌟 Elite researchers have **>95%** valid report rates
-- 📈 The platform has grown significantly - see the trends yourself!
-- � **One-click data refresh** right from the dashboard
-- 🤖 **AI remembers** your last 5 questions for natural follow-ups
+- **JWT Authentication** - Secure token-based auth with expiration
+- **Role-Based Access Control** - Admin vs. Customer permissions
+- **Data Isolation** - Organizations see only their data
+- **SQL Injection Prevention** - Parameterized queries and escaping
+- **Secrets Management** - Environment-based configuration
 
-## Performance Stats
+## ⚡ Performance
 
-- 📊 **10,000+ vulnerability reports** in the database
-- ⚡ **<100ms** average API response time
-- 🚀 **<2 seconds** dashboard load time
-- 💾 **~50MB** database size (DuckDB is efficient!)
-- 🤖 **1-3 seconds** for AI-powered queries
+| Metric | Value |
+|--------|-------|
+| Dataset Size | 10,000+ reports |
+| Database Size | ~50MB (DuckDB) |
+| API Response Time | <100ms avg |
+| Dashboard Load | <2s |
+| AI Query Time | 1-3s |
 
-## Security Features
+## � Data Insights
 
-- 🔐 JWT authentication with role-based access
-- 🏢 Organization-level data isolation
-- 🛡️ SQL injection prevention
-- 🔑 Secure secrets management via `.env`
+- **Most Common Vulnerability:** Information Disclosure
+- **Top Bounty Rate:** 90%+ for elite programs
+- **Researcher Success Rate:** >95% for top contributors
+- **Active Organizations:** 100+ programs
+- **Unique Vulnerabilities:** 50+ weakness types
 
-## Want to know more?
+## 🛠️ Technology Stack
 
-Check out `docs/DESIGN.md` for the complete architecture breakdown - both high-level and low-level design explained simply.
+**Backend**
+- FastAPI 0.104+ (REST API)
+- DuckDB 0.9+ (Analytics Database)
+- Python 3.11+ (Core Language)
+
+**Frontend**
+- Streamlit 1.29+ (Dashboard)
+- Plotly (Visualizations)
+
+**AI/ML**
+- OpenAI GPT-4o-mini (NLP)
+- Custom query detection engine
+
+**Security**
+- python-jose (JWT)
+- passlib (Password hashing)
+
+## 📚 Documentation
+
+- **API Docs:** http://localhost:8000/docs (Swagger UI)
+- **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+## 🤝 Contributing
+
+Built for HackerOne's Senior Data Engineer assignment.
+
+**Author:** Hitesh Kumar  
+**Date:** March 2026
+
+## � License
+
+This project is built for educational and demonstration purposes.
 
 ---
 
-**Built with Python, FastAPI, Streamlit, DuckDB, and a passion for security intelligence.**
-
-Made for HackerOne's Senior Data Engineer assignment by **Hitesh Kumar** | March 2026
-
-🙏 Thanks to HackerOne for the dataset, OpenAI for GPT-4o-mini, and the amazing open-source community.
-
-**Enjoy exploring!** 🚀
+**Built with Python, FastAPI, Streamlit, DuckDB, and OpenAI** 🚀

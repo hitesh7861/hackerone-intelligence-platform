@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import timedelta
-import config
+from src import config
 from src.api.models import (
     LoginRequest, Token, User, VulnerabilityMetric, OrganizationMetric,
     ReporterMetric, TimeTrend, SeverityAnalysis, NLPQueryRequest, NLPQueryResponse
@@ -51,6 +51,22 @@ async def get_vulnerabilities(
     results = db.execute_query_dict(query)
     return results
 
+@router.get("/vulnerabilities/{weakness_name}", response_model=VulnerabilityMetric)
+async def get_vulnerability_by_name(
+    weakness_name: str,
+    current_user: dict = Depends(get_current_user)
+):
+    # Escape single quotes to prevent SQL injection
+    safe_name = weakness_name.replace("'", "''")
+    query = f"""
+        SELECT * FROM vw_vulnerability_metrics
+        WHERE weakness_name = '{safe_name}'
+    """
+    results = db.execute_query_dict(query)
+    if not results:
+        raise HTTPException(status_code=404, detail="Vulnerability not found")
+    return results[0]
+
 @router.get("/organizations", response_model=List[OrganizationMetric])
 async def get_organizations(
     limit: Optional[int] = 50,
@@ -63,6 +79,31 @@ async def get_organizations(
     """
     results = db.execute_query_dict(query)
     return results
+
+@router.get("/organizations/{team_handle}", response_model=OrganizationMetric)
+async def get_organization_by_handle(
+    team_handle: str,
+    current_user: dict = Depends(get_current_user)
+):
+    if current_user["role"] == "customer":
+        if current_user["organization"] != team_handle:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Can only access your own organization"
+            )
+    
+    # Escape single quotes to prevent SQL injection
+    safe_handle = team_handle.replace("'", "''")
+    query = f"""
+        SELECT * FROM vw_organization_metrics
+        WHERE team_handle = '{safe_handle}'
+    """
+    results = db.execute_query_dict(query)
+    
+    if not results:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    return results[0]
 
 @router.get("/organizations/me", response_model=OrganizationMetric)
 async def get_my_organization(current_user: dict = Depends(get_current_user)):
@@ -134,6 +175,22 @@ async def get_reporters(
     results = db.execute_query_dict(query)
     return results
 
+@router.get("/reporters/{reporter_username}", response_model=ReporterMetric)
+async def get_reporter_by_username(
+    reporter_username: str,
+    current_user: dict = Depends(get_current_user)
+):
+    # Escape single quotes to prevent SQL injection
+    safe_username = reporter_username.replace("'", "''")
+    query = f"""
+        SELECT * FROM vw_reporter_metrics
+        WHERE reporter_username = '{safe_username}'
+    """
+    results = db.execute_query_dict(query)
+    if not results:
+        raise HTTPException(status_code=404, detail="Reporter not found")
+    return results[0]
+
 @router.get("/trends/time", response_model=List[TimeTrend])
 async def get_time_trends(current_user: dict = Depends(get_current_user)):
     query = """
@@ -181,6 +238,21 @@ async def get_overview_stats(current_user: dict = Depends(get_current_user)):
     
     results = db.execute_query_dict(query)
     return results[0] if results else {}
+
+@router.get("/admin/users", response_model=List[User])
+async def get_all_users(current_user: dict = Depends(get_admin_user)):
+    # Return the list of demo users
+    from src.api.auth import DEMO_USERS
+    
+    users = []
+    for username, user_data in DEMO_USERS.items():
+        users.append({
+            "username": username,
+            "role": user_data["role"],
+            "organization": user_data.get("organization")
+        })
+    
+    return users
 
 @router.post("/query/nlp", response_model=NLPQueryResponse)
 async def nlp_query(

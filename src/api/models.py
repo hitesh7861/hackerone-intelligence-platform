@@ -19,8 +19,6 @@ class VulnerabilityMetric(BaseModel):
     weakness_name: str
     total_reports: int
     bounty_reports: int
-    avg_bounty: Optional[float]
-    max_bounty: Optional[float]
     avg_votes: Optional[float]
     bounty_rate: Optional[float]
 
@@ -29,8 +27,6 @@ class OrganizationMetric(BaseModel):
     team_name: str
     total_reports: int
     bounty_reports: int
-    total_bounty_paid: Optional[float]
-    avg_bounty: Optional[float]
     avg_votes: Optional[float]
     bounty_rate: Optional[float]
     first_report_date: Optional[datetime]
@@ -41,8 +37,6 @@ class ReporterMetric(BaseModel):
     reporter_name: str
     total_reports: int
     bounty_reports: int
-    total_earnings: Optional[float]
-    avg_bounty: Optional[float]
     avg_votes: Optional[float]
     bounty_rate: Optional[float]
     first_report_date: Optional[datetime]
@@ -52,8 +46,6 @@ class TimeTrend(BaseModel):
     month: datetime
     total_reports: int
     bounty_reports: int
-    total_bounty: Optional[float]
-    avg_bounty: Optional[float]
     active_organizations: int
     active_reporters: int
 
@@ -62,7 +54,6 @@ class SeverityAnalysis(BaseModel):
     total_reports: int
     bounty_reports: int
     avg_severity_score: Optional[float]
-    avg_bounty: Optional[float]
     bounty_rate: Optional[float]
 
 class NLPQueryRequest(BaseModel):
@@ -70,6 +61,6 @@ class NLPQueryRequest(BaseModel):
 
 class NLPQueryResponse(BaseModel):
     query: str
-    sql_generated: str
+    sql_generated: Optional[str] = None
     results: List[dict]
     explanation: str
