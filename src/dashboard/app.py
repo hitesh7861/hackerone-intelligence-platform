@@ -670,16 +670,16 @@ elif page == "Security Threats":
     with col1:
         st.metric("Total Types", len(vuln_df))
     with col2:
-        st.metric("Avg Severity", f"{vuln_df['avg_severity'].mean():.2f}")
-    with col3:
         st.metric("Avg Bounty Rate", f"{vuln_df['bounty_rate'].mean():.1f}%")
-    with col4:
+    with col3:
         st.metric("Total Reports", f"{vuln_df['total_reports'].sum():,}")
+    with col4:
+        st.metric("Avg Votes", f"{vuln_df['avg_votes'].mean():.1f}")
     
     st.markdown("---")
     
     st.dataframe(
-        vuln_df[['weakness_name', 'total_reports', 'bounty_reports', 'avg_severity', 'bounty_rate']],
+        vuln_df[['weakness_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         use_container_width=True,
         height=600
     )
@@ -706,7 +706,7 @@ elif page == "Companies":
     st.markdown("---")
     
     st.dataframe(
-        org_df[['team_name', 'total_reports', 'bounty_reports', 'avg_severity', 'bounty_rate']],
+        org_df[['team_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         use_container_width=True,
         height=600
     )
@@ -733,7 +733,7 @@ elif page == "Researchers":
     st.markdown("---")
     
     st.dataframe(
-        researcher_df[['reporter_username', 'total_reports', 'bounty_reports', 'avg_severity', 'bounty_rate']].head(100),
+        researcher_df[['reporter_username', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']].head(100),
         use_container_width=True,
         height=600
     )
@@ -772,7 +772,7 @@ elif page == "Intelligence Reports":
     st.subheader("Top Security Threats")
     
     top_vulns = db.execute_query("""
-        SELECT weakness_name, total_reports, bounty_rate, avg_severity
+        SELECT weakness_name, total_reports, bounty_rate, avg_votes
         FROM vw_vulnerability_metrics
         ORDER BY total_reports DESC
         LIMIT 5
@@ -785,15 +785,15 @@ elif page == "Intelligence Reports":
                 st.metric("Total Reports", f"{row['total_reports']:,}")
                 st.metric("Bounty Rate", f"{row['bounty_rate']:.1f}%")
             with col2:
-                st.metric("Avg Severity", f"{row['avg_severity']:.2f}")
+                st.metric("Avg Community Votes", f"{row['avg_votes']:.1f}")
             
             st.markdown(f"""
             **Risk Assessment:**
             - Frequency: {'High' if row['total_reports'] > 500 else 'Medium' if row['total_reports'] > 200 else 'Low'}
             - Bounty Success: {'High' if row['bounty_rate'] > 60 else 'Medium' if row['bounty_rate'] > 40 else 'Low'}
-            - Severity Level: {'Critical' if row['avg_severity'] > 7 else 'High' if row['avg_severity'] > 5 else 'Medium'}
+            - Community Interest: {'High' if row['avg_votes'] > 5 else 'Medium' if row['avg_votes'] > 2 else 'Low'}
             
-            **Recommendation:** {'Immediate action required' if row['avg_severity'] > 7 else 'Monitor and implement fixes' if row['avg_severity'] > 5 else 'Regular security review'}
+            **Recommendation:** {'High priority - frequent and well-rewarded' if row['bounty_rate'] > 60 else 'Monitor and implement fixes' if row['bounty_rate'] > 40 else 'Regular security review'}
             """)
     
     st.markdown("---")

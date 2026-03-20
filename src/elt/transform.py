@@ -103,14 +103,6 @@ class DataTransformer:
                 v.weakness_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(CASE 
-                    WHEN LOWER(f.severity_rating) = 'critical' THEN 4
-                    WHEN LOWER(f.severity_rating) = 'high' THEN 3
-                    WHEN LOWER(f.severity_rating) = 'medium' THEN 2
-                    WHEN LOWER(f.severity_rating) = 'low' THEN 1
-                    WHEN f.severity_score > 0 THEN f.severity_score
-                    ELSE NULL 
-                END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate
             FROM fact_reports f
@@ -126,14 +118,6 @@ class DataTransformer:
                 o.team_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(CASE 
-                    WHEN LOWER(f.severity_rating) = 'critical' THEN 4
-                    WHEN LOWER(f.severity_rating) = 'high' THEN 3
-                    WHEN LOWER(f.severity_rating) = 'medium' THEN 2
-                    WHEN LOWER(f.severity_rating) = 'low' THEN 1
-                    WHEN f.severity_score > 0 THEN f.severity_score
-                    ELSE NULL 
-                END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate,
                 o.first_report_date,
@@ -151,14 +135,6 @@ class DataTransformer:
                 r.reporter_name,
                 COUNT(DISTINCT f.id) as total_reports,
                 SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(CASE 
-                    WHEN LOWER(f.severity_rating) = 'critical' THEN 4
-                    WHEN LOWER(f.severity_rating) = 'high' THEN 3
-                    WHEN LOWER(f.severity_rating) = 'medium' THEN 2
-                    WHEN LOWER(f.severity_rating) = 'low' THEN 1
-                    WHEN f.severity_score > 0 THEN f.severity_score
-                    ELSE NULL 
-                END), 2) as avg_severity,
                 ROUND(AVG(f.vote_count), 2) as avg_votes,
                 ROUND(100.0 * SUM(CASE WHEN f.has_bounty THEN 1 ELSE 0 END) / COUNT(*), 2) as bounty_rate,
                 r.first_report_date,
@@ -176,14 +152,6 @@ class DataTransformer:
                 DATE_TRUNC('month', created_at) as month,
                 COUNT(DISTINCT id) as total_reports,
                 SUM(CASE WHEN has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-                ROUND(AVG(CASE 
-                    WHEN LOWER(severity_rating) = 'critical' THEN 4
-                    WHEN LOWER(severity_rating) = 'high' THEN 3
-                    WHEN LOWER(severity_rating) = 'medium' THEN 2
-                    WHEN LOWER(severity_rating) = 'low' THEN 1
-                    WHEN severity_score > 0 THEN severity_score
-                    ELSE NULL 
-                END), 2) as avg_severity,
                 COUNT(DISTINCT team_handle) as active_organizations,
                 COUNT(DISTINCT reporter_username) as active_reporters
             FROM fact_reports
