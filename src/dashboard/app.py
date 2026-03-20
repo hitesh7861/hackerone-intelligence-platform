@@ -128,6 +128,16 @@ st.markdown("""
         overflow-x: hidden !important;
     }
     
+    /* Hide anchor link icons on headers */
+    .stMarkdown h1 a,
+    .stMarkdown h2 a,
+    .stMarkdown h3 a,
+    h1 a[href^="#"],
+    h2 a[href^="#"],
+    h3 a[href^="#"] {
+        display: none !important;
+    }
+    
     [data-testid="stSidebar"]::-webkit-scrollbar,
     [data-testid="stSidebar"] *::-webkit-scrollbar {
         display: none !important;
