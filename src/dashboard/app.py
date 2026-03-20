@@ -1024,30 +1024,49 @@ elif page == "Strategic Insights":
         """)
 
 elif page == "AI Assistant":
-    st.title("AI-Powered Assistant")
-    
-    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
-    
-    # Clear chat button with icon
-    delete_icon_path = Path(__file__).parent / "assets" / "delete.png"
-    if delete_icon_path.exists():
-        import base64
-        with open(str(delete_icon_path), 'rb') as f:
-            delete_icon_data = base64.b64encode(f.read()).decode()
-        
-        col1, col2 = st.columns([0.85, 0.15])
-        with col2:
-            if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+    # Header with icon-based clear button
+    col1, col2 = st.columns([0.9, 0.1])
+    with col1:
+        st.title("AI-Powered Assistant")
+    with col2:
+        delete_icon_path = Path(__file__).parent / "assets" / "delete.png"
+        if delete_icon_path.exists():
+            import base64
+            with open(str(delete_icon_path), 'rb') as f:
+                delete_icon_data = base64.b64encode(f.read()).decode()
+            
+            # Custom button with icon
+            st.markdown(f"""
+            <style>
+            .clear-chat-btn {{
+                background: transparent;
+                border: 1px solid #666666;
+                border-radius: 6px;
+                padding: 0.4rem 0.8rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: #a3a3a3;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+                margin-top: 0.5rem;
+            }}
+            .clear-chat-btn:hover {{
+                background: #1a1a1a;
+                border-color: #8b5cf6;
+                color: #ffffff;
+            }}
+            </style>
+            """, unsafe_allow_html=True)
+            
+            if st.button("🗑️ Clear", key="clear-chat", help="Clear conversation history"):
                 st.session_state.messages = []
                 st.rerun()
-    else:
-        col1, col2 = st.columns([0.85, 0.15])
-        with col2:
-            if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+        else:
+            if st.button("Clear Chat", key="clear-chat", help="Clear conversation history"):
                 st.session_state.messages = []
                 st.rerun()
-    
-    st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
     
     if not config.AI_ENABLED:
         st.warning("AI features require OpenAI API key. Configure it in your .env file.")
