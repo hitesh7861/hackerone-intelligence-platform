@@ -1035,13 +1035,13 @@ elif page == "AI Assistant":
         with open(str(delete_icon_path), 'rb') as f:
             delete_icon_data = base64.b64encode(f.read()).decode()
         
-        col1, col2, col3 = st.columns([0.85, 0.15, 0])
+        col1, col2 = st.columns([0.85, 0.15])
         with col2:
             if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
                 st.session_state.messages = []
                 st.rerun()
     else:
-        col1, col2, col3 = st.columns([0.85, 0.15, 0])
+        col1, col2 = st.columns([0.85, 0.15])
         with col2:
             if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
                 st.session_state.messages = []
