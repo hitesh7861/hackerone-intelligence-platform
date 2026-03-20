@@ -576,6 +576,7 @@ if page == "Dashboard":
         FROM fact_reports
     """).iloc[0]
     
+    # First row of metrics
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -583,10 +584,24 @@ if page == "Dashboard":
     with col2:
         st.metric("Bounty Reports", f"{int(metrics['bounty_reports']):,}")
     with col3:
-        st.metric("Vulnerability Types", f"{int(metrics['vulnerability_types']):,}")
-    with col4:
         bounty_rate = (metrics['bounty_reports'] / metrics['total_reports'] * 100)
         st.metric("Bounty Rate", f"{bounty_rate:.1f}%")
+    with col4:
+        st.metric("Organizations", f"{int(metrics['organizations']):,}")
+    
+    # Second row of metrics
+    col5, col6, col7, col8 = st.columns(4)
+    
+    with col5:
+        st.metric("Researchers", f"{int(metrics['researchers']):,}")
+    with col6:
+        st.metric("Vulnerability Types", f"{int(metrics['vulnerability_types']):,}")
+    with col7:
+        avg_votes = db.execute_query("SELECT AVG(vote_count) as avg FROM fact_reports").iloc[0]['avg']
+        st.metric("Avg Community Votes", f"{avg_votes:.1f}")
+    with col8:
+        top_vuln = db.execute_query("SELECT weakness_name FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 1").iloc[0]['weakness_name']
+        st.metric("Top Threat", top_vuln[:15] + "..." if len(top_vuln) > 15 else top_vuln)
     
     st.markdown("---")
     
@@ -594,54 +609,83 @@ if page == "Dashboard":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Top 10 Vulnerabilities")
+        st.subheader("🎯 Threat Landscape")
         top_vulns = db.execute_query("""
-            SELECT weakness_name, total_reports
+            SELECT weakness_name, total_reports, bounty_rate
             FROM vw_vulnerability_metrics
             ORDER BY total_reports DESC
             LIMIT 10
         """)
         
+        # Gradient color based on bounty rate
         fig = px.bar(top_vulns, x='total_reports', y='weakness_name',
                      orientation='h',
-                     labels={'total_reports': 'Reports', 'weakness_name': ''})
+                     color='bounty_rate',
+                     color_continuous_scale=['#ef4444', '#f59e0b', '#10b981'],
+                     labels={'total_reports': 'Reports', 'weakness_name': '', 'bounty_rate': 'Bounty %'})
         fig.update_layout(
             height=400,
             showlegend=False,
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#a3a3a3', size=12),
-            xaxis=dict(gridcolor='#1a1a1a'),
+            font=dict(color='#a3a3a3', size=11),
+            xaxis=dict(gridcolor='#1a1a1a', showgrid=True),
             yaxis=dict(categoryorder='total ascending', gridcolor='#1a1a1a'),
-            margin=dict(l=0, r=0, t=0, b=0)
+            margin=dict(l=0, r=20, t=0, b=0),
+            coloraxis_colorbar=dict(title="Bounty %", thickness=10, len=0.7)
         )
-        fig.update_traces(marker_color='#8b5cf6')
         st.plotly_chart(fig, use_container_width=True)
+        
+        # Insight box
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); padding: 1rem; border-radius: 8px; border-left: 3px solid #8b5cf6; margin-top: 0.5rem;'>
+            <p style='color: #a3a3a3; font-size: 0.85rem; margin: 0;'>
+                <strong style='color: #8b5cf6;'>💡 Key Insight:</strong> Color intensity shows bounty success rate. 
+                Greener = higher payouts, indicating valuable vulnerabilities.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Top 10 Organizations")
+        st.subheader("🏆 Program Performance Matrix")
         top_orgs = db.execute_query("""
-            SELECT team_name, total_reports
+            SELECT team_name, total_reports, bounty_rate, avg_votes
             FROM vw_organization_metrics
             ORDER BY total_reports DESC
-            LIMIT 10
+            LIMIT 15
         """)
         
-        fig = px.bar(top_orgs, x='total_reports', y='team_name',
-                     orientation='h',
-                     labels={'total_reports': 'Reports', 'team_name': ''})
+        # Scatter plot: Volume vs Quality
+        fig = px.scatter(top_orgs, 
+                        x='total_reports', 
+                        y='bounty_rate',
+                        size='avg_votes',
+                        hover_data=['team_name'],
+                        color='bounty_rate',
+                        color_continuous_scale=['#ef4444', '#f59e0b', '#10b981'],
+                        labels={'total_reports': 'Report Volume', 'bounty_rate': 'Bounty Rate (%)', 'avg_votes': 'Community Engagement'})
         fig.update_layout(
             height=400,
-            showlegend=False,
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#a3a3a3', size=12),
-            xaxis=dict(gridcolor='#1a1a1a'),
-            yaxis=dict(categoryorder='total ascending', gridcolor='#1a1a1a'),
-            margin=dict(l=0, r=0, t=0, b=0)
+            font=dict(color='#a3a3a3', size=11),
+            xaxis=dict(gridcolor='#1a1a1a', showgrid=True, title='Report Volume'),
+            yaxis=dict(gridcolor='#1a1a1a', showgrid=True, title='Bounty Rate (%)'),
+            margin=dict(l=0, r=20, t=0, b=0),
+            coloraxis_colorbar=dict(title="Bounty %", thickness=10, len=0.7)
         )
-        fig.update_traces(marker_color='#10b981')
+        fig.update_traces(marker=dict(line=dict(width=1, color='#ffffff')))
         st.plotly_chart(fig, use_container_width=True)
+        
+        # Insight box
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); padding: 1rem; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 0.5rem;'>
+            <p style='color: #a3a3a3; font-size: 0.85rem; margin: 0;'>
+                <strong style='color: #10b981;'>📊 Performance Map:</strong> Top-right quadrant = high volume + high payouts (elite programs). 
+                Bubble size = community engagement level.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -661,11 +705,29 @@ elif page == "Security Threats":
     st.title("Vulnerability Analysis")
     st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comprehensive breakdown of vulnerability types, severity patterns, and bounty economics by threat category</p>", unsafe_allow_html=True)
     
+    # Interactive filters
+    col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
+    with col_f1:
+        min_reports = st.slider("Minimum Reports", 0, 500, 50, 25, help="Filter vulnerabilities by minimum report count")
+    with col_f2:
+        top_n = st.selectbox("Show Top N", [10, 20, 50, 100, "All"], index=0, help="Limit number of results")
+    with col_f3:
+        sort_by = st.selectbox("Sort By", ["Reports", "Bounty Rate"], help="Sort vulnerabilities by metric")
+    
+    # Fetch data with filters
     vuln_df = db.execute_query("""
         SELECT * FROM vw_vulnerability_metrics
         ORDER BY total_reports DESC
     """)
     
+    # Apply filters
+    vuln_df = vuln_df[vuln_df['total_reports'] >= min_reports]
+    if sort_by == "Bounty Rate":
+        vuln_df = vuln_df.sort_values('bounty_rate', ascending=False)
+    if top_n != "All":
+        vuln_df = vuln_df.head(int(top_n))
+    
+    # Metrics
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Types", len(vuln_df))
@@ -678,20 +740,94 @@ elif page == "Security Threats":
     
     st.markdown("---")
     
+    # Visualizations
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("📊 Volume vs Bounty Success")
+        # Scatter plot
+        fig = px.scatter(vuln_df.head(30), 
+                        x='total_reports', 
+                        y='bounty_rate',
+                        size='avg_votes',
+                        hover_data=['weakness_name'],
+                        color='bounty_rate',
+                        color_continuous_scale='Turbo',
+                        labels={'total_reports': 'Total Reports', 'bounty_rate': 'Bounty Rate (%)', 'avg_votes': 'Avg Votes'})
+        fig.update_layout(
+            height=350,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#a3a3a3', size=10),
+            xaxis=dict(gridcolor='#1a1a1a', showgrid=True),
+            yaxis=dict(gridcolor='#1a1a1a', showgrid=True),
+            margin=dict(l=0, r=20, t=0, b=0),
+            coloraxis_colorbar=dict(title="Bounty %", thickness=8, len=0.6)
+        )
+        fig.update_traces(marker=dict(line=dict(width=0.5, color='#ffffff')))
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        st.subheader("🎯 Top Threats by Bounty Rate")
+        top_bounty = vuln_df.nlargest(10, 'bounty_rate')
+        fig = px.bar(top_bounty, 
+                     x='bounty_rate', 
+                     y='weakness_name',
+                     orientation='h',
+                     color='total_reports',
+                     color_continuous_scale='Plasma',
+                     labels={'bounty_rate': 'Bounty Rate (%)', 'weakness_name': '', 'total_reports': 'Reports'})
+        fig.update_layout(
+            height=350,
+            showlegend=False,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#a3a3a3', size=10),
+            xaxis=dict(gridcolor='#1a1a1a', showgrid=True),
+            yaxis=dict(categoryorder='total ascending', gridcolor='#1a1a1a'),
+            margin=dict(l=0, r=20, t=0, b=0),
+            coloraxis_colorbar=dict(title="Reports", thickness=8, len=0.6)
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("---")
+    
+    # Insight box
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #6366f1; margin-bottom: 1rem;'>
+        <p style='color: #e0e7ff; font-size: 0.9rem; margin: 0; line-height: 1.6;'>
+            <strong style='color: #a5b4fc;'>🔍 Strategic Insight:</strong> High bounty rates indicate valuable vulnerabilities that organizations prioritize. 
+            Focus security efforts on top-right quadrant vulnerabilities (high volume + high bounty rate) for maximum impact.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Data table
+    st.subheader("Detailed Breakdown")
     st.dataframe(
         vuln_df[['weakness_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         use_container_width=True,
-        height=600
+        height=400
     )
 
 elif page == "Companies":
     st.title("Organization Metrics")
     st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Performance benchmarking: report volume, bounty rates, and program effectiveness across participating organizations</p>", unsafe_allow_html=True)
     
+    # Interactive filters
+    col_f1, col_f2 = st.columns([2, 2])
+    with col_f1:
+        min_reports_org = st.slider("Minimum Reports", 0, 200, 20, 10, help="Filter organizations by minimum report count")
+    with col_f2:
+        min_bounty_rate = st.slider("Minimum Bounty Rate (%)", 0, 100, 0, 5, help="Filter by minimum bounty success rate")
+    
     org_df = db.execute_query("""
         SELECT * FROM vw_organization_metrics
         ORDER BY total_reports DESC
     """)
+    
+    # Apply filters
+    org_df = org_df[(org_df['total_reports'] >= min_reports_org) & (org_df['bounty_rate'] >= min_bounty_rate)]
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -705,10 +841,47 @@ elif page == "Companies":
     
     st.markdown("---")
     
+    # Performance Matrix Scatter Plot
+    st.subheader("📈 Program Performance Quadrant Analysis")
+    
+    fig = px.scatter(org_df.head(50), 
+                    x='total_reports', 
+                    y='bounty_rate',
+                    size='avg_votes',
+                    hover_data=['team_name'],
+                    color='bounty_rate',
+                    color_continuous_scale=['#dc2626', '#f59e0b', '#10b981', '#06b6d4'],
+                    labels={'total_reports': 'Report Volume', 'bounty_rate': 'Bounty Rate (%)', 'avg_votes': 'Community Votes'})
+    fig.update_layout(
+        height=450,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#a3a3a3', size=11),
+        xaxis=dict(gridcolor='#1a1a1a', showgrid=True, title='Report Volume'),
+        yaxis=dict(gridcolor='#1a1a1a', showgrid=True, title='Bounty Success Rate (%)'),
+        margin=dict(l=0, r=20, t=0, b=0),
+        coloraxis_colorbar=dict(title="Bounty %", thickness=10, len=0.7)
+    )
+    fig.update_traces(marker=dict(line=dict(width=1, color='#ffffff')))
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Insight box
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #10b981; margin-bottom: 1rem;'>
+        <p style='color: #d1fae5; font-size: 0.9rem; margin: 0; line-height: 1.6;'>
+            <strong style='color: #6ee7b7;'>🎯 Elite Programs:</strong> Top-right quadrant organizations demonstrate both high volume and high bounty rates - 
+            these are mature security programs that attract quality researchers and reward valuable findings generously.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    st.subheader("Detailed Organization Data")
     st.dataframe(
         org_df[['team_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         use_container_width=True,
-        height=600
+        height=400
     )
 
 elif page == "Researchers":
