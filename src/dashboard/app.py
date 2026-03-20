@@ -948,9 +948,10 @@ elif page == "Market Evolution":
         font=dict(color='#a3a3a3'),
         xaxis=dict(gridcolor='#1a1a1a'),
         yaxis=dict(gridcolor='#1a1a1a'),
-        legend=dict(bgcolor='rgba(0,0,0,0)')
+        legend=dict(bgcolor='rgba(0,0,0,0)'),
+        margin=dict(l=40, r=40, t=40, b=40)
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True, 'displaylogo': False})
 
 elif page == "Strategic Insights":
     st.title("Strategic Insights")
