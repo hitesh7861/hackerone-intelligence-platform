@@ -1024,14 +1024,30 @@ elif page == "Strategic Insights":
         """)
 
 elif page == "AI Assistant":
-    # Header with clear button
-    col1, col2 = st.columns([0.85, 0.15])
-    with col1:
-        st.title("AI-Powered Assistant")
-    with col2:
-        if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
-            st.session_state.messages = []
-            st.rerun()
+    st.title("AI-Powered Assistant")
+    
+    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+    
+    # Clear chat button with icon
+    delete_icon_path = Path(__file__).parent / "assets" / "delete.png"
+    if delete_icon_path.exists():
+        import base64
+        with open(str(delete_icon_path), 'rb') as f:
+            delete_icon_data = base64.b64encode(f.read()).decode()
+        
+        col1, col2, col3 = st.columns([0.85, 0.15, 0])
+        with col2:
+            if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+                st.session_state.messages = []
+                st.rerun()
+    else:
+        col1, col2, col3 = st.columns([0.85, 0.15, 0])
+        with col2:
+            if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+                st.session_state.messages = []
+                st.rerun()
+    
+    st.markdown("<div style='margin-bottom: 1rem;'></div>", unsafe_allow_html=True)
     
     if not config.AI_ENABLED:
         st.warning("AI features require OpenAI API key. Configure it in your .env file.")
