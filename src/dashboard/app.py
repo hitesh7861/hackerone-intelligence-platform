@@ -536,7 +536,7 @@ with st.sidebar:
     page = st.radio(
         "Navigation",
         ["Executive Dashboard", "Threat Intelligence", "Program Benchmarks", "Community Analytics", 
-         "Market Evolution", "Strategic Insights", "Security Reference", "Data Workbench", "🤖 AI Assistant"],
+         "Market Evolution", "Strategic Insights", "Security Reference", "Data Workbench", "AI Assistant"],
         label_visibility="collapsed"
     )
     
@@ -609,7 +609,7 @@ if page == "Executive Dashboard":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("🎯 Threat Landscape")
+        st.subheader("Threat Landscape")
         top_vulns = db.execute_query("""
             SELECT weakness_name, total_reports, bounty_rate
             FROM vw_vulnerability_metrics
@@ -640,14 +640,14 @@ if page == "Executive Dashboard":
         st.markdown("""
         <div style='background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); padding: 1rem; border-radius: 8px; border-left: 3px solid #8b5cf6; margin-top: 0.5rem;'>
             <p style='color: #a3a3a3; font-size: 0.85rem; margin: 0;'>
-                <strong style='color: #8b5cf6;'>💡 Key Insight:</strong> Color intensity shows bounty success rate. 
+                <strong style='color: #8b5cf6;'>Key Insight:</strong> Color intensity shows bounty success rate. 
                 Greener = higher payouts, indicating valuable vulnerabilities.
             </p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("🏆 Program Performance Matrix")
+        st.subheader("Program Performance Matrix")
         top_orgs = db.execute_query("""
             SELECT team_name, total_reports, bounty_rate, avg_votes
             FROM vw_organization_metrics
@@ -681,7 +681,7 @@ if page == "Executive Dashboard":
         st.markdown("""
         <div style='background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); padding: 1rem; border-radius: 8px; border-left: 3px solid #10b981; margin-top: 0.5rem;'>
             <p style='color: #a3a3a3; font-size: 0.85rem; margin: 0;'>
-                <strong style='color: #10b981;'>📊 Performance Map:</strong> Top-right quadrant = high volume + high payouts (elite programs). 
+                <strong style='color: #10b981;'>Performance Map:</strong> Top-right quadrant = high volume + high payouts (elite programs). 
                 Bubble size = community engagement level.
             </p>
         </div>
@@ -743,7 +743,7 @@ elif page == "Threat Intelligence":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("📊 Volume vs Bounty Success")
+        st.subheader("Volume vs Bounty Success")
         # Scatter plot
         fig = px.scatter(vuln_df.head(30), 
                         x='total_reports', 
@@ -767,7 +767,7 @@ elif page == "Threat Intelligence":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.subheader("🎯 Top Threats by Bounty Rate")
+        st.subheader("Top Threats by Bounty Rate")
         top_bounty = vuln_df.nlargest(10, 'bounty_rate')
         fig = px.bar(top_bounty, 
                      x='bounty_rate', 
@@ -795,7 +795,7 @@ elif page == "Threat Intelligence":
     st.markdown("""
     <div style='background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #6366f1; margin-bottom: 1rem;'>
         <p style='color: #e0e7ff; font-size: 0.9rem; margin: 0; line-height: 1.6;'>
-            <strong style='color: #a5b4fc;'>🔍 Strategic Insight:</strong> High bounty rates indicate valuable vulnerabilities that organizations prioritize. 
+            <strong style='color: #a5b4fc;'>Strategic Insight:</strong> High bounty rates indicate valuable vulnerabilities that organizations prioritize. 
             Focus security efforts on top-right quadrant vulnerabilities (high volume + high bounty rate) for maximum impact.
         </p>
     </div>
@@ -841,7 +841,7 @@ elif page == "Program Benchmarks":
     st.markdown("---")
     
     # Performance Matrix Scatter Plot
-    st.subheader("📈 Program Performance Quadrant Analysis")
+    st.subheader("Program Performance Quadrant Analysis")
     
     fig = px.scatter(org_df.head(50), 
                     x='total_reports', 
@@ -868,7 +868,7 @@ elif page == "Program Benchmarks":
     st.markdown("""
     <div style='background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #10b981; margin-bottom: 1rem;'>
         <p style='color: #d1fae5; font-size: 0.9rem; margin: 0; line-height: 1.6;'>
-            <strong style='color: #6ee7b7;'>🎯 Elite Programs:</strong> Top-right quadrant organizations demonstrate both high volume and high bounty rates - 
+            <strong style='color: #6ee7b7;'>Elite Programs:</strong> Top-right quadrant organizations demonstrate both high volume and high bounty rates - 
             these are mature security programs that attract quality researchers and reward valuable findings generously.
         </p>
     </div>
@@ -1002,13 +1002,13 @@ elif page == "Strategic Insights":
         5. Engage actively with the security community
         """)
 
-elif page == "🤖 AI Assistant":
+elif page == "AI Assistant":
     # Header with clear button
     col1, col2 = st.columns([0.85, 0.15])
     with col1:
         st.title("AI-Powered Assistant")
     with col2:
-        if st.button("🗑️ Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
+        if st.button("Clear Chat", key="clear-chat", help="Clear conversation and start fresh"):
             st.session_state.messages = []
             st.rerun()
     
