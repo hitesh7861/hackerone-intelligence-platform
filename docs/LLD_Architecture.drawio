@@ -1,0 +1,232 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
+  <diagram name="HackerOne Intelligence Platform - LLD" id="lld-architecture">
+    <mxGraphModel dx="1783" dy="1140" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1" value="HackerOne Intelligence Platform - Low Level Design" vertex="1">
+          <mxGeometry height="40" width="700" x="300" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="db-section-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a5490;" value="Database Schema (DuckDB)" vertex="1">
+          <mxGeometry height="30" width="300" x="30" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="raw-reports" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="raw_reports" vertex="1">
+          <mxGeometry height="230" width="180" x="30" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="raw-reports-fields" parent="raw-reports" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=9;" value="id (PK)&#xa;title&#xa;created_at&#xa;disclosed_at&#xa;state&#xa;substate&#xa;severity_rating&#xa;severity_score&#xa;weakness_id&#xa;weakness_name&#xa;reporter_username&#xa;reporter_name&#xa;team_handle&#xa;team_name&#xa;bounty_amount&#xa;has_bounty&#xa;vote_count" vertex="1">
+          <mxGeometry height="202" width="180" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-vulnerabilities" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="dim_vulnerabilities" vertex="1">
+          <mxGeometry height="80" width="170" x="250" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-vulnerabilities-fields" parent="dim-vulnerabilities" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=9;" value="weakness_id (PK)&#xa;weakness_name" vertex="1">
+          <mxGeometry height="52" width="170" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-organizations" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="dim_organizations" vertex="1">
+          <mxGeometry height="110" width="170" x="460" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-organizations-fields" parent="dim-organizations" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=9;" value="team_handle (PK)&#xa;team_name&#xa;first_report_date&#xa;latest_report_date" vertex="1">
+          <mxGeometry height="82" width="170" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-researchers" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="dim_reporters" vertex="1">
+          <mxGeometry height="110" width="170" x="670" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dim-researchers-fields" parent="dim-researchers" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=9;" value="reporter_username (PK)&#xa;reporter_name&#xa;first_report_date&#xa;latest_report_date" vertex="1">
+          <mxGeometry height="82" width="170" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="fact-reports" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=28;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="fact_reports" vertex="1">
+          <mxGeometry height="200" width="180" x="350" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="fact-reports-fields" parent="fact-reports" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=9;" value="id (PK)&#xa;created_at&#xa;disclosed_at&#xa;weakness_id (FK)&#xa;reporter_username (FK)&#xa;team_handle (FK)&#xa;severity_rating&#xa;severity_score&#xa;bounty_amount&#xa;bonus_amount&#xa;has_bounty&#xa;vote_count&#xa;voter_count&#xa;state&#xa;substate" vertex="1">
+          <mxGeometry height="172" width="180" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="views-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a5490;" value="Business Views" vertex="1">
+          <mxGeometry height="30" width="200" x="40" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="vw-vulnerability-metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="vw_vulnerability_metrics&#xa;&#xa;• weakness_name&#xa;• total_reports&#xa;• bounty_reports&#xa;• avg_votes&#xa;• bounty_rate" vertex="1">
+          <mxGeometry height="100" width="165" x="40" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="vw-organization-metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="vw_organization_metrics&#xa;&#xa;• team_handle&#xa;• team_name&#xa;• total_reports&#xa;• bounty_reports&#xa;• avg_votes&#xa;• bounty_rate&#xa;• first_report_date&#xa;• latest_report_date" vertex="1">
+          <mxGeometry height="120" width="165" x="225" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="vw-reporter-metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="vw_reporter_metrics&#xa;&#xa;• reporter_username&#xa;• reporter_name&#xa;• total_reports&#xa;• bounty_reports&#xa;• avg_votes&#xa;• bounty_rate&#xa;• first_report_date&#xa;• latest_report_date" vertex="1">
+          <mxGeometry height="120" width="165" x="410" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="vw-time-trends" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="vw_time_trends&#xa;&#xa;• month&#xa;• total_reports&#xa;• bounty_reports&#xa;• active_organizations&#xa;• active_reporters" vertex="1">
+          <mxGeometry height="100" width="165" x="600" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="api-section-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a5490;" value="REST API Endpoints (FastAPI)" vertex="1">
+          <mxGeometry height="30" width="350" x="950" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="auth-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Authentication&#xa;&#xa;POST /api/v1/auth/login&#xa;  → JWT token generation&#xa;  → Role validation&#xa;&#xa;Middleware:&#xa;  → get_current_user()&#xa;  → require_admin()" vertex="1">
+          <mxGeometry height="125" width="220" x="950" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="vuln-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Vulnerabilities&#xa;&#xa;GET /api/v1/vulnerabilities&#xa;  → List all vulnerabilities&#xa;  → Pagination support&#xa;&#xa;GET /api/v1/vulnerabilities/{name}&#xa;  → Specific details&#xa;  → Related reports count" vertex="1">
+          <mxGeometry height="125" width="220" x="1190" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="org-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Organizations&#xa;&#xa;GET /api/v1/organizations&#xa;  → List all organizations&#xa;  → RBAC: Admin sees all&#xa;&#xa;GET /api/v1/organizations/{handle}&#xa;  → Organization metrics&#xa;  → RBAC: Customer own only" vertex="1">
+          <mxGeometry height="125" width="220" x="950" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="reporter-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Reporters&#xa;&#xa;GET /api/v1/reporters&#xa;  → List all reporters&#xa;  → Sorted by reputation&#xa;&#xa;GET /api/v1/reporters/{username}&#xa;  → Reporter profile&#xa;  → Performance metrics" vertex="1">
+          <mxGeometry height="125" width="220" x="1190" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="trends-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Trends &amp; Analytics&#xa;&#xa;GET /api/v1/trends/time&#xa;  → Monthly trend analysis&#xa;  → Growth metrics&#xa;&#xa;GET /api/v1/trends/severity&#xa;  → Severity distribution&#xa;  → Risk analysis" vertex="1">
+          <mxGeometry height="130" width="220" x="950" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="nlp-endpoints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="AI Assistant&#xa;&#xa;POST /api/v1/query/nlp&#xa;  → Natural language query&#xa;  → Query classification:&#xa;    • conversation&#xa;    • data_query&#xa;    • insight&#xa;  → SQL generation&#xa;  → Result formatting" vertex="1">
+          <mxGeometry height="130" width="220" x="1190" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-raw-to-dim" edge="1" parent="1" source="raw-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#666666;dashed=1;" target="dim-vulnerabilities" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-label-1" connectable="0" parent="arrow-raw-to-dim" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#666666;" value="Transform" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-dim-to-fact" edge="1" parent="1" source="dim-vulnerabilities" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" target="fact-reports" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="335" y="240" />
+              <mxPoint x="380" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-label-2" connectable="0" parent="arrow-dim-to-fact" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#666666;" value="FK" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint x="-10" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-org-to-fact" edge="1" parent="1" source="dim-organizations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" target="fact-reports" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="545" y="240" />
+              <mxPoint x="470" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-label-org" connectable="0" parent="arrow-org-to-fact" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#666666;" value="FK" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint x="10" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-researcher-to-fact" edge="1" parent="1" source="dim-researchers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#82b366;" target="fact-reports" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="755" y="240" />
+              <mxPoint x="560" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-label-researcher" connectable="0" parent="arrow-researcher-to-fact" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#666666;" value="FK" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint x="30" y="-8" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fact-to-views" edge="1" parent="1" source="fact-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;" target="vw-vulnerability-metrics" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="123" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-label-3" connectable="0" parent="arrow-fact-to-views" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#666666;" value="Aggregate" vertex="1">
+          <mxGeometry relative="1" x="-0.2" y="1" as="geometry">
+            <mxPoint x="-35" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fact-to-org-view" edge="1" parent="1" source="fact-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;" target="vw-organization-metrics" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="308" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fact-to-reporter-view" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;" target="vw-reporter-metrics" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="493" y="510" />
+            </Array>
+            <mxPoint x="500" y="510" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-fact-to-time-view" edge="1" parent="1" source="fact-reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;" target="vw-time-trends" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="678" y="510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="components-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a5490;" value="Component Interactions" vertex="1">
+          <mxGeometry height="30" width="300" x="40" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="elt-component" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="ELT Pipeline&#xa;&#xa;1. Extract (extract.py)&#xa;   → Load CSV from HuggingFace&#xa;   → Parse nested JSON&#xa;   → Data validation&#xa;&#xa;2. Load (load.py)&#xa;   → Create raw_reports table&#xa;   → Bulk insert data&#xa;&#xa;3. Transform (transform.py)&#xa;   → Build dimensions&#xa;   → Create fact table&#xa;   → Generate views" vertex="1">
+          <mxGeometry height="200" width="210" x="40" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="api-component" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="FastAPI Application&#xa;&#xa;• JWT Authentication&#xa;  → Token generation&#xa;  → Token validation&#xa;  → Role-based access&#xa;&#xa;• Route Handlers&#xa;  → Request validation&#xa;  → Business logic&#xa;  → Response formatting&#xa;&#xa;• Database Connection&#xa;  → Connection pooling&#xa;  → Query execution&#xa;  → Result mapping" vertex="1">
+          <mxGeometry height="200" width="210" x="270" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="ai-component" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="AI NLP Engine&#xa;&#xa;• Query Classification&#xa;  → Keyword detection&#xa;  → Intent recognition&#xa;  → Mode selection&#xa;&#xa;• SQL Generation&#xa;  → Schema context&#xa;  → Query construction&#xa;  → Validation&#xa;&#xa;• Response Formatting&#xa;  → Data presentation&#xa;  → Explanation generation" vertex="1">
+          <mxGeometry height="200" width="210" x="500" y="781" as="geometry" />
+        </mxCell>
+        <mxCell id="dashboard-component" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Streamlit Dashboard&#xa;&#xa;• Page Routing&#xa;  → Navigation system&#xa;  → Page rendering&#xa;&#xa;• Data Visualization&#xa;  → Plotly charts&#xa;  → Interactive filters&#xa;  → Real-time updates&#xa;&#xa;• Direct DB Access&#xa;  → No API dependency&#xa;  → View queries&#xa;  → Data caching" vertex="1">
+          <mxGeometry height="190" width="210" x="40" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="security-component" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Security Layer&#xa;&#xa;• JWT Authentication&#xa;  → HS256 algorithm&#xa;  → 30-minute expiry&#xa;  → Secure secret key&#xa;&#xa;• RBAC Implementation&#xa;  → Admin: Full access&#xa;  → Customer: Own data only&#xa;  → Decorator-based checks&#xa;&#xa;• Data Isolation&#xa;  → Query filtering&#xa;  → Organization-based" vertex="1">
+          <mxGeometry height="190" width="210" x="270" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="tech-stack-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1a5490;" value="Technology Stack" vertex="1">
+          <mxGeometry height="30" width="250" x="40" y="1230" as="geometry" />
+        </mxCell>
+        <mxCell id="tech-stack" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;verticalAlign=top;spacingLeft=8;spacingTop=4;" value="Core Technologies&#xa;&#xa;• Python 3.8+&#xa;• FastAPI (REST API)&#xa;• Streamlit (Dashboard)&#xa;• DuckDB (Analytics DB)&#xa;• OpenAI GPT-4o-mini (AI)&#xa;• Plotly (Visualization)&#xa;• Pandas (Data Processing)&#xa;• Python-Jose (JWT)&#xa;• Passlib (Password Hashing)&#xa;• Uvicorn (ASGI Server)" vertex="1">
+          <mxGeometry height="160" width="210" x="40" y="1270" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-box" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#CCCCCC;" value="" vertex="1">
+          <mxGeometry height="110" width="530" x="900" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" value="Legend" vertex="1">
+          <mxGeometry height="20" width="100" x="920" y="842" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;align=center;" value="Raw Data" vertex="1">
+          <mxGeometry height="18" width="70" x="920" y="872" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;align=center;" value="Dimensions" vertex="1">
+          <mxGeometry height="18" width="70" x="1000" y="872" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;align=center;" value="Fact Table" vertex="1">
+          <mxGeometry height="18" width="70" x="1080" y="872" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=8;align=center;" value="Views" vertex="1">
+          <mxGeometry height="18" width="70" x="1160" y="872" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;align=center;" value="Auth" vertex="1">
+          <mxGeometry height="18" width="70" x="920" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=8;align=center;" value="AI/Security" vertex="1">
+          <mxGeometry height="18" width="70" x="1000" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-item-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=8;align=center;" value="Components" vertex="1">
+          <mxGeometry height="18" width="70" x="1080" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-arrow-1" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#82b366;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1240" y="881" as="sourcePoint" />
+            <mxPoint x="1290" y="881" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-arrow-label-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=8;" value="FK Relationship" vertex="1">
+          <mxGeometry height="18" width="80" x="1295" y="872" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-arrow-2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#666666;dashed=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1240" y="909" as="sourcePoint" />
+            <mxPoint x="1290" y="909" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-arrow-label-2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=8;" value="Data Flow" vertex="1">
+          <mxGeometry height="18" width="80" x="1295" y="900" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

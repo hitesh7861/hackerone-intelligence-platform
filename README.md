@@ -18,21 +18,24 @@ A production-ready intelligence platform that transforms 10,000+ HackerOne vulne
 
 ## 🏗️ Architecture
 
-```
-HuggingFace Dataset (10K+ reports)
-         ↓
-   ELT Pipeline
-         ↓
-   DuckDB Database
-         ↓
-    ┌────┴────┐
-    ↓         ↓
-REST API   Dashboard
-(FastAPI)  (Streamlit)
-    ↓
-AI Engine
-(GPT-4o-mini)
-```
+### High-Level Design (HLD)
+
+![HLD Architecture](src/dashboard/assets/HLD_Architecture.svg)
+
+**[View Editable HLD Diagram](docs/HLD_Architecture.drawio)** (Open in [draw.io](https://app.diagrams.net/))
+
+### Low-Level Design (LLD)
+
+![LLD Architecture](src/dashboard/assets/LLD_Architecture.svg)
+
+**[View Editable LLD Diagram](docs/LLD_Architecture.drawio)** (Open in [draw.io](https://app.diagrams.net/))
+
+The LLD diagram shows:
+- **Database Schema**: Star schema with fact and dimension tables
+- **Business Views**: Pre-aggregated metrics for performance
+- **REST API Endpoints**: All 15+ API routes with authentication
+- **Component Interactions**: ELT pipeline, API, Dashboard, AI Engine
+- **Technology Stack**: Complete tech stack with versions
 
 **Tech Stack:** Python • FastAPI • Streamlit • DuckDB • OpenAI • Plotly • JWT
 
@@ -94,6 +97,21 @@ python run_api.py
 - **Admin** - User management (admin-only)
 
 ## 🔌 API Usage
+
+### Postman Collection
+
+Import the pre-configured Postman collection for instant API testing:
+
+**📦 Collection Files:**
+- **[HackerOne_API_Collection.postman_collection.json](HackerOne_API_Collection.postman_collection.json)** - All 15+ API endpoints
+- **[HackerOne_API_Environment.postman_environment.json](HackerOne_API_Environment.postman_environment.json)** - Environment variables
+
+**Import Steps:**
+1. Open Postman
+2. Click **Import** → Select both JSON files
+3. Select the "HackerOne API" environment
+4. Run the **Login** request to get your token (auto-saved to environment)
+5. Test any endpoint - authentication is handled automatically!
 
 ### Authentication
 

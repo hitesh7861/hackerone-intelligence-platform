@@ -1,0 +1,486 @@
+{
+	"info": {
+		"_postman_id": "hackerone-api-collection",
+		"name": "HackerOne Intelligence Platform API",
+		"description": "Complete API collection for HackerOne Intelligence Platform with JWT authentication and RBAC",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login - Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"access_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with admin credentials (full access)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Mail.ru Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"access_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"mailru\",\n  \"password\": \"mailru123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with Mail.ru customer credentials (limited to Mail.ru data)"
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Shopify Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"access_token\", jsonData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"shopify\",\n  \"password\": \"shopify123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with Shopify customer credentials (limited to Shopify data)"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for JWT token generation"
+		},
+		{
+			"name": "Vulnerability Metrics",
+			"item": [
+				{
+					"name": "Get All Vulnerabilities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vulnerabilities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vulnerabilities"
+							]
+						},
+						"description": "Get all vulnerability metrics with report counts, bounty rates, and community votes"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vulnerability by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/vulnerabilities/Cross-site Scripting (XSS) - Stored",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vulnerabilities",
+								"Cross-site Scripting (XSS) - Stored"
+							]
+						},
+						"description": "Get metrics for a specific vulnerability type"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for vulnerability analysis and metrics"
+		},
+		{
+			"name": "Organization Metrics",
+			"item": [
+				{
+					"name": "Get All Organizations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/organizations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"organizations"
+							]
+						},
+						"description": "Get all organization metrics (admin sees all, customers see only their org)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Organization by Handle",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/organizations/mailru",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"organizations",
+								"mailru"
+							]
+						},
+						"description": "Get metrics for a specific organization"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for organization performance metrics"
+		},
+		{
+			"name": "Reporter Analytics",
+			"item": [
+				{
+					"name": "Get All Reporters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reporters",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reporters"
+							]
+						},
+						"description": "Get all reporter analytics with report counts and bounty rates"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Reporter by Username",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reporters/bobrov",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"reporters",
+								"bobrov"
+							]
+						},
+						"description": "Get analytics for a specific security researcher"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for security researcher analytics"
+		},
+		{
+			"name": "Time Trends",
+			"item": [
+				{
+					"name": "Get Time Trends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/trends/time",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"trends",
+								"time"
+							]
+						},
+						"description": "Get temporal trends showing report volume and bounty rates over time"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for temporal trend analysis"
+		},
+		{
+			"name": "Severity Analysis",
+			"item": [
+				{
+					"name": "Get Severity Analysis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/trends/severity",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"trends",
+								"severity"
+							]
+						},
+						"description": "Get severity distribution and analysis across all reports"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for severity analysis"
+		},
+		{
+			"name": "AI Assistant",
+			"item": [
+				{
+					"name": "Query AI Assistant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"What are the top 5 vulnerabilities?\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/query/nlp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"query",
+								"nlp"
+							]
+						},
+						"description": "Query the AI assistant with natural language questions"
+					},
+					"response": []
+				},
+				{
+					"name": "AI Query - Vulnerability Analysis",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"Show me vulnerabilities with high bounty rates\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/query/nlp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"query",
+								"nlp"
+							]
+						},
+						"description": "Example: Query for high-value vulnerabilities"
+					},
+					"response": []
+				},
+				{
+					"name": "AI Query - Organization Stats",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"Which organizations have the best security programs?\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/query/nlp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"query",
+								"nlp"
+							]
+						},
+						"description": "Example: Query for top-performing organizations"
+					},
+					"response": []
+				}
+			],
+			"description": "AI-powered natural language query endpoints"
+		},
+		{
+			"name": "Admin Only",
+			"item": [
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users"
+							]
+						},
+						"description": "Admin-only endpoint to view all users (requires admin role)"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin-only endpoints (requires admin authentication)"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
