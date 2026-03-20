@@ -935,23 +935,28 @@ elif page == "Market Evolution":
     """)
     
     st.subheader("Report Volume Over Time")
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=trend_df['month'], y=trend_df['total_reports'],
-                             mode='lines+markers', name='Total Reports', line=dict(width=3, color='#8b5cf6')))
-    fig.add_trace(go.Scatter(x=trend_df['month'], y=trend_df['bounty_reports'],
-                             mode='lines+markers', name='Bounty Reports', line=dict(width=3, color='#10b981')))
-    fig.update_layout(
-        height=400,
-        hovermode='x unified',
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#a3a3a3'),
-        xaxis=dict(gridcolor='#1a1a1a'),
-        yaxis=dict(gridcolor='#1a1a1a'),
-        legend=dict(bgcolor='rgba(0,0,0,0)'),
-        margin=dict(l=40, r=40, t=40, b=40)
-    )
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True, 'displaylogo': False})
+    
+    # Add padding columns to prevent toolbar overflow
+    col_left, col_chart, col_right = st.columns([0.05, 0.9, 0.05])
+    
+    with col_chart:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=trend_df['month'], y=trend_df['total_reports'],
+                                 mode='lines+markers', name='Total Reports', line=dict(width=3, color='#8b5cf6')))
+        fig.add_trace(go.Scatter(x=trend_df['month'], y=trend_df['bounty_reports'],
+                                 mode='lines+markers', name='Bounty Reports', line=dict(width=3, color='#10b981')))
+        fig.update_layout(
+            height=400,
+            hovermode='x unified',
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#a3a3a3'),
+            xaxis=dict(gridcolor='#1a1a1a'),
+            yaxis=dict(gridcolor='#1a1a1a'),
+            legend=dict(bgcolor='rgba(0,0,0,0)'),
+            margin=dict(l=40, r=40, t=40, b=40)
+        )
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True, 'displaylogo': False})
 
 elif page == "Strategic Insights":
     st.title("Strategic Insights")
