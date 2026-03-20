@@ -113,6 +113,21 @@ st.markdown("""
         -ms-overflow-style: none !important;
     }
     
+    /* Fix scrollbar positioning at different zoom levels */
+    .main .block-container {
+        max-width: 100% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+    }
+    
+    .main {
+        overflow-x: hidden !important;
+    }
+    
+    body {
+        overflow-x: hidden !important;
+    }
+    
     [data-testid="stSidebar"]::-webkit-scrollbar,
     [data-testid="stSidebar"] *::-webkit-scrollbar {
         display: none !important;
