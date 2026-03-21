@@ -20,13 +20,13 @@ A production-ready intelligence platform that transforms 10,000+ HackerOne vulne
 
 ### High-Level Design (HLD)
 
-![HLD Architecture](src/dashboard/assets/HLD_Architecture.svg)
+![HLD Architecture](src/dashboard/assets/HLD_Architecture.drawio.png)
 
 **[View Editable HLD Diagram](docs/HLD_Architecture.drawio)** (Open in [draw.io](https://app.diagrams.net/))
 
 ### Low-Level Design (LLD)
 
-![LLD Architecture](src/dashboard/assets/LLD_Architecture.svg)
+![LLD Architecture](src/dashboard/assets/LLD_Architecture.drawio.png)
 
 **[View Editable LLD Diagram](docs/LLD_Architecture.drawio)** (Open in [draw.io](https://app.diagrams.net/))
 
