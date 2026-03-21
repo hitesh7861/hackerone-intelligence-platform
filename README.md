@@ -270,6 +270,7 @@ The AI automatically distinguishes between data queries and conversational quest
 
 - **API Docs:** http://localhost:8000/docs (Swagger UI)
 - **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Technical & Functional Flow:** [docs/technical_and_functional_flow.md](docs/technical_and_functional_flow.md)
 
 ## Contributing
 
