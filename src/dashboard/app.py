@@ -733,13 +733,11 @@ elif page == "Threat Intelligence":
     st.markdown("<p style='color: #a3a3a3; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Deep-dive analysis of security weaknesses, attack patterns, and economic incentives driving the vulnerability disclosure ecosystem</p>", unsafe_allow_html=True)
     
     # Interactive filters
-    col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
+    col_f1, col_f2 = st.columns([3, 2])
     with col_f1:
         min_reports = st.slider("Minimum Reports", 0, 500, 50, 25, help="Filter vulnerabilities by minimum report count")
     with col_f2:
         top_n = st.selectbox("Show Top N", [10, 20, 50, 100, "All"], index=0, help="Limit number of results")
-    with col_f3:
-        sort_by = st.selectbox("Sort By", ["Reports", "Bounty Rate"], help="Sort vulnerabilities by metric")
     
     # Fetch data with filters
     vuln_df = db.execute_query("""
@@ -747,23 +745,25 @@ elif page == "Threat Intelligence":
         ORDER BY total_reports DESC
     """)
     
-    # Apply filters
+    # Apply minimum reports filter
     vuln_df = vuln_df[vuln_df['total_reports'] >= min_reports]
-    if sort_by == "Bounty Rate":
-        vuln_df = vuln_df.sort_values('bounty_rate', ascending=False)
+    
+    # Apply top N limit for metrics and charts
     if top_n != "All":
-        vuln_df = vuln_df.head(int(top_n))
+        vuln_df_display = vuln_df.head(int(top_n))
+    else:
+        vuln_df_display = vuln_df
     
     # Metrics
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Total Types", len(vuln_df))
+        st.metric("Total Types", len(vuln_df_display))
     with col2:
-        st.metric("Avg Bounty Rate", f"{vuln_df['bounty_rate'].mean():.1f}%")
+        st.metric("Avg Bounty Rate", f"{vuln_df_display['bounty_rate'].mean():.1f}%")
     with col3:
-        st.metric("Total Reports", f"{vuln_df['total_reports'].sum():,}")
+        st.metric("Total Reports", f"{vuln_df_display['total_reports'].sum():,}")
     with col4:
-        st.metric("Avg Votes", f"{vuln_df['avg_votes'].mean():.1f}")
+        st.metric("Avg Votes", f"{vuln_df_display['avg_votes'].mean():.1f}")
     
     st.markdown("---")
     
@@ -773,7 +773,7 @@ elif page == "Threat Intelligence":
     with col1:
         st.subheader("Volume vs Bounty Success")
         # Scatter plot
-        fig = px.scatter(vuln_df.head(30), 
+        fig = px.scatter(vuln_df_display.head(30), 
                         x='total_reports', 
                         y='bounty_rate',
                         size='avg_votes',
@@ -796,7 +796,7 @@ elif page == "Threat Intelligence":
     
     with col2:
         st.subheader("Top Threats by Bounty Rate")
-        top_bounty = vuln_df.nlargest(10, 'bounty_rate')
+        top_bounty = vuln_df_display.nlargest(10, 'bounty_rate')
         fig = px.bar(top_bounty, 
                      x='bounty_rate', 
                      y='weakness_name',
@@ -829,10 +829,20 @@ elif page == "Threat Intelligence":
     </div>
     """, unsafe_allow_html=True)
     
-    # Data table
-    st.subheader("Detailed Breakdown")
+    # Data table with sort option
+    col_t1, col_t2 = st.columns([3, 1])
+    with col_t1:
+        st.subheader("Detailed Breakdown")
+    with col_t2:
+        sort_by = st.selectbox("Sort By", ["Reports", "Bounty Rate"], help="Sort table by metric", label_visibility="visible")
+    
+    # Apply sort to table data
+    table_df = vuln_df_display.copy()
+    if sort_by == "Bounty Rate":
+        table_df = table_df.sort_values('bounty_rate', ascending=False)
+    
     st.dataframe(
-        vuln_df[['weakness_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
+        table_df[['weakness_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         use_container_width=True,
         height=400
     )
