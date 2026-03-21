@@ -934,15 +934,21 @@ elif page == "Community Analytics":
         ORDER BY total_reports DESC
     """)
     
+    # Get platform-wide total and attributed reports
+    total_reports_platform = db.execute_query("SELECT COUNT(*) as count FROM fact_reports").iloc[0]['count']
+    attributed_reports = researcher_df['total_reports'].sum()
+    
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Researchers", len(researcher_df))
     with col2:
-        st.metric("Avg Reports", f"{researcher_df['total_reports'].mean():.0f}")
+        st.metric("Avg Reports/Researcher", f"{researcher_df['total_reports'].mean():.0f}")
     with col3:
         st.metric("Avg Bounty Rate", f"{researcher_df['bounty_rate'].mean():.1f}%")
     with col4:
-        st.metric("Total Reports", f"{researcher_df['total_reports'].sum():,}")
+        st.metric("Attributed Reports", f"{int(attributed_reports):,}", 
+                  delta=f"{int(total_reports_platform):,} total", 
+                  delta_color="off")
     
     st.markdown("---")
     
