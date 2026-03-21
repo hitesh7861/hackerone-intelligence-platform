@@ -186,17 +186,15 @@ st.markdown("""
     
     /* Metrics */
     [data-testid="stMetricValue"] {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: #ffffff;
+        font-size: 24px;
+        color: #1f77b4;
     }
-    
     [data-testid="stMetricLabel"] {
-        font-size: 0.875rem;
+        font-size: 14px;
         font-weight: 600;
-        color: #737373;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    }
+    div[data-testid="column"]:nth-of-type(1) [data-testid="stMetricValue"] {
+        font-size: 20px;
     }
     
     /* DataFrames */
@@ -602,7 +600,7 @@ if page == "Executive Dashboard":
     """).iloc[0]
     
     # First row of metrics
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric("Total Reports", f"{int(metrics['total_reports']):,}")
@@ -611,22 +609,18 @@ if page == "Executive Dashboard":
     with col3:
         bounty_rate = (metrics['bounty_reports'] / metrics['total_reports'] * 100)
         st.metric("Bounty Rate", f"{bounty_rate:.1f}%")
-    with col4:
-        st.metric("Organizations", f"{int(metrics['organizations']):,}")
     
-    # Second row of metrics
-    col5, col6, col7, col8 = st.columns(4)
+    st.markdown("---")
+    
+    col4, col5 = st.columns([1, 3])
+    
+    top_vuln = db.execute_query('SELECT weakness_name FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 1').iloc[0]['weakness_name']
+    
+    with col4:
+        st.metric("TOP Threat", top_vuln)
     
     with col5:
-        st.metric("Researchers", f"{int(metrics['researchers']):,}")
-    with col6:
-        st.metric("Vulnerability Types", f"{int(metrics['vulnerability_types']):,}")
-    with col7:
-        avg_votes = db.execute_query("SELECT AVG(vote_count) as avg FROM fact_reports").iloc[0]['avg']
-        st.metric("Avg Community Votes", f"{avg_votes:.1f}")
-    with col8:
-        top_vuln = db.execute_query("SELECT weakness_name FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 1").iloc[0]['weakness_name']
-        st.metric("Top Threat", top_vuln[:15] + "..." if len(top_vuln) > 15 else top_vuln)
+        st.info(f"🔍 **{top_vuln}** is the most reported vulnerability type with the highest occurrence across all programs.")
     
     st.markdown("---")
     
