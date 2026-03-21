@@ -22,7 +22,7 @@
 
 ## System Overview
 
-The HackerOne Intelligence Platform is an enterprise-grade analytical system built using an **ELT (Extract, Load, Transform)** architecture pattern. The platform processes 10,000+ vulnerability reports from HackerOne's disclosed reports dataset and provides real-time analytics through multiple interfaces.
+The HackerOne Intelligence Platform is an **AI-first**, enterprise-grade analytical system built using an **ELT (Extract, Load, Transform)** architecture pattern. The platform processes 10,000+ vulnerability reports from HackerOne's disclosed reports dataset and provides real-time analytics through multiple interfaces, with artificial intelligence at its core for natural language querying, pattern detection, and intelligent insights generation.
 
 ### Core Architecture Pattern: ELT
 
@@ -958,7 +958,7 @@ pip install -r requirements.txt
 # 2. Run data pipeline
 python run_pipeline.py
 
-# 3. Start API server
+# 3. Start API server (local only)
 python run_api.py  # http://localhost:8000
 
 # 4. Start dashboard
@@ -967,29 +967,36 @@ python run_dashboard.py  # http://localhost:8501
 
 ### Production Deployment
 
-**API Server:**
+**Current Status:**
+- **Dashboard:** Deployed on Streamlit Cloud (production)
+- **API Server:** Available for local development only (not deployed)
+- **Database:** Local DuckDB file (data/hackerone.duckdb)
+
+**Dashboard Deployment:**
+The Streamlit dashboard is deployed and accessible via Streamlit Cloud. The dashboard operates independently with direct database access.
+
+**API Server (Local Development):**
+The REST API is fully functional for local development and testing:
 ```bash
+# Run locally
 uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Access API docs
+http://localhost:8000/docs
 ```
+
+**Note:** The API server is not currently deployed to production. All production analytics are served through the Streamlit dashboard interface.
+
+### Performance Metrics (Local)
 
 **Dashboard:**
-```bash
-streamlit run src/dashboard/app.py --server.port 8501 --server.address 0.0.0.0
-```
-
-### Monitoring
-
-**Key Metrics:**
-- API response time: <100ms average
-- Dashboard load time: <2s
+- Load time: <2s
 - Database query time: <50ms for views
 - AI query time: 1-3s
 
-**Health Checks:**
-```python
-GET /api/v1/health
-Returns: {"status": "healthy", "database": "connected"}
-```
+**API (Local Development):**
+- Response time: <100ms average
+- Health check endpoint available at `/api/v1/health`
 
 ---
 
@@ -997,11 +1004,11 @@ Returns: {"status": "healthy", "database": "connected"}
 
 This technical and functional flow documentation provides a comprehensive overview of the HackerOne Intelligence Platform's architecture, implementation, and operational workflows. The platform demonstrates:
 
+- **AI-First Design**: Natural language query interface, intelligent pattern detection, and automated insights generation powered by OpenAI GPT-4o-mini
 - **Scalable Architecture**: ELT pattern with star schema design
 - **Security First**: JWT authentication with RBAC
 - **Performance Optimized**: Sub-100ms query times with caching
-- **AI-Powered**: Natural language query interface
-- **User-Friendly**: 9 specialized dashboard pages
-- **API-First**: 15+ RESTful endpoints with OpenAPI documentation
+- **User-Friendly**: 9 specialized dashboard pages with AI assistant
+- **API-Ready**: 15+ RESTful endpoints with OpenAPI documentation
 
-The system successfully processes 10,000+ vulnerability reports and provides actionable intelligence through multiple interfaces, supporting both technical and business users in making data-driven security decisions.
+The system successfully processes 10,000+ vulnerability reports and provides actionable intelligence through multiple interfaces, supporting both technical and business users in making data-driven security decisions. With AI at its core, the platform enables intuitive data exploration and delivers intelligent insights that would traditionally require extensive manual analysis.

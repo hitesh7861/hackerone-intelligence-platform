@@ -1,19 +1,21 @@
 # HackerOne Intelligence Platform
 
-> Enterprise-grade vulnerability intelligence platform with AI-powered insights, RESTful API, and interactive dashboards.
+> **AI-first** enterprise vulnerability intelligence platform with natural language querying, intelligent insights, RESTful API, and interactive dashboards.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red.svg)](https://streamlit.io/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-0.9+-yellow.svg)](https://duckdb.org/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-purple.svg)](https://openai.com/)
 
 ## Overview
 
-A production-ready intelligence platform that transforms 10,000+ HackerOne vulnerability reports into actionable insights through:
+An **AI-first**, production-ready intelligence platform that transforms 10,000+ HackerOne vulnerability reports into actionable insights through:
 
+- **AI Assistant** - Natural language queries with intelligent SQL generation powered by OpenAI GPT-4o-mini
+- **Intelligent Insights** - Automated pattern detection and vulnerability trend analysis
+- **Interactive Dashboard** - Real-time analytics with 9 specialized pages and AI-powered exploration
 - **Secure REST API** - JWT authentication with role-based access control
-- **AI Assistant** - Natural language queries with intelligent SQL generation
-- **Interactive Dashboard** - Real-time analytics with 9 specialized pages
 - **High Performance** - DuckDB-powered analytics with <100ms response times
 
 ## Architecture
