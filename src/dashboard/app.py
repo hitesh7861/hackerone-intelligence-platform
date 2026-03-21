@@ -591,14 +591,18 @@ if page == "Executive Dashboard":
         SELECT
             COUNT(DISTINCT id) as total_reports,
             SUM(CASE WHEN has_bounty THEN 1 ELSE 0 END) as bounty_reports,
-            COUNT(DISTINCT weakness_id) as vulnerability_types,
-            COUNT(DISTINCT team_handle) as organizations,
             COUNT(DISTINCT reporter_username) as researchers
         FROM fact_reports
     """).iloc[0]
     
-    # Calculate average vote count
-    avg_votes = db.execute_query("SELECT AVG(vote_count) as avg_votes FROM fact_reports").iloc[0]['avg_votes']
+    # Get vulnerability types count from dimension table
+    vulnerability_types = db.execute_query("SELECT COUNT(*) as count FROM dim_vulnerabilities").iloc[0]['count']
+    
+    # Get organizations count from dimension table
+    organizations = db.execute_query("SELECT COUNT(*) as count FROM dim_organizations").iloc[0]['count']
+    
+    # Calculate average vote count (excluding zeros for more meaningful metric)
+    avg_votes = db.execute_query("SELECT AVG(vote_count) as avg_votes FROM fact_reports WHERE vote_count > 0").iloc[0]['avg_votes']
     
     # First row of metrics
     col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
@@ -611,9 +615,9 @@ if page == "Executive Dashboard":
         bounty_rate = (metrics['bounty_reports'] / metrics['total_reports'] * 100)
         st.metric("Bounty Rate", f"{bounty_rate:.1f}%")
     with col4:
-        st.metric("Vulnerability Types", f"{int(metrics['vulnerability_types']):,}")
+        st.metric("Vulnerability Types", f"{int(vulnerability_types):,}")
     with col5:
-        st.metric("Organizations", f"{int(metrics['organizations']):,}")
+        st.metric("Organizations", f"{int(organizations):,}")
     with col6:
         st.metric("Researchers", f"{int(metrics['researchers']):,}")
     with col7:
