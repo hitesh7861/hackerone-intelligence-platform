@@ -2,6 +2,8 @@
 
 > **AI-first** enterprise vulnerability intelligence platform with natural language querying, intelligent insights, RESTful API, and interactive dashboards.
 
+**[🚀 View Live Dashboard](https://hackerone-intelligence-platform.streamlit.app/)**
+
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red.svg)](https://streamlit.io/)
