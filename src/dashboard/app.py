@@ -616,19 +616,15 @@ if page == "Executive Dashboard":
     
     st.markdown("---")
     
-    col6, col7 = st.columns([1, 4])
-    
     top_vuln = db.execute_query('SELECT weakness_name FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 1').iloc[0]['weakness_name']
     
-    with col6:
-        st.metric("TOP Threat", top_vuln)
+    st.metric("TOP Threat", top_vuln)
     
-    with col7:
-        st.markdown(f"""
-        <div style='background-color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6; margin-top: 0.5rem;'>
-            <span style='color: #60a5fa;'>🔍</span> <strong>{top_vuln}</strong> is the most reported vulnerability type with the highest occurrence across all programs.
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style='background-color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6; margin-top: 0.5rem; margin-bottom: 1rem;'>
+        <span style='color: #60a5fa;'>🔍</span> <strong>{top_vuln}</strong> is the most reported vulnerability type with the highest occurrence across all programs.
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     
