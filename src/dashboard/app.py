@@ -600,7 +600,7 @@ if page == "Executive Dashboard":
     """).iloc[0]
     
     # First row of metrics
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.metric("Total Reports", f"{int(metrics['total_reports']):,}")
@@ -609,18 +609,26 @@ if page == "Executive Dashboard":
     with col3:
         bounty_rate = (metrics['bounty_reports'] / metrics['total_reports'] * 100)
         st.metric("Bounty Rate", f"{bounty_rate:.1f}%")
+    with col4:
+        st.metric("Organizations", f"{int(metrics['organizations']):,}")
+    with col5:
+        st.metric("Researchers", f"{int(metrics['researchers']):,}")
     
     st.markdown("---")
     
-    col4, col5 = st.columns([1, 3])
+    col6, col7 = st.columns([1, 4])
     
     top_vuln = db.execute_query('SELECT weakness_name FROM vw_vulnerability_metrics ORDER BY total_reports DESC LIMIT 1').iloc[0]['weakness_name']
     
-    with col4:
+    with col6:
         st.metric("TOP Threat", top_vuln)
     
-    with col5:
-        st.info(f"🔍 **{top_vuln}** is the most reported vulnerability type with the highest occurrence across all programs.")
+    with col7:
+        st.markdown(f"""
+        <div style='background-color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6; margin-top: 0.5rem;'>
+            <span style='color: #60a5fa;'>🔍</span> <strong>{top_vuln}</strong> is the most reported vulnerability type with the highest occurrence across all programs.
+        </div>
+        """, unsafe_allow_html=True)
     
     st.markdown("---")
     
