@@ -599,8 +599,11 @@ if page == "Executive Dashboard":
         FROM fact_reports
     """).iloc[0]
     
+    # Calculate average vote count
+    avg_votes = db.execute_query("SELECT AVG(vote_count) as avg_votes FROM fact_reports").iloc[0]['avg_votes']
+    
     # First row of metrics
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
     
     with col1:
         st.metric("Total Reports", f"{int(metrics['total_reports']):,}")
@@ -610,9 +613,13 @@ if page == "Executive Dashboard":
         bounty_rate = (metrics['bounty_reports'] / metrics['total_reports'] * 100)
         st.metric("Bounty Rate", f"{bounty_rate:.1f}%")
     with col4:
-        st.metric("Organizations", f"{int(metrics['organizations']):,}")
+        st.metric("Vulnerability Types", f"{int(metrics['vulnerability_types']):,}")
     with col5:
+        st.metric("Organizations", f"{int(metrics['organizations']):,}")
+    with col6:
         st.metric("Researchers", f"{int(metrics['researchers']):,}")
+    with col7:
+        st.metric("Avg Vote Count", f"{avg_votes:.1f}")
     
     st.markdown("---")
     
