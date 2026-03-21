@@ -1,4 +1,4 @@
-# 🔒 HackerOne Intelligence Platform
+# HackerOne Intelligence Platform
 
 > Enterprise-grade vulnerability intelligence platform with AI-powered insights, RESTful API, and interactive dashboards.
 
@@ -7,16 +7,16 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.29+-red.svg)](https://streamlit.io/)
 [![DuckDB](https://img.shields.io/badge/DuckDB-0.9+-yellow.svg)](https://duckdb.org/)
 
-## 🎯 Overview
+## Overview
 
 A production-ready intelligence platform that transforms 10,000+ HackerOne vulnerability reports into actionable insights through:
 
-- **🔐 Secure REST API** - JWT authentication with role-based access control
-- **🤖 AI Assistant** - Natural language queries with intelligent SQL generation
-- **📊 Interactive Dashboard** - Real-time analytics with 9 specialized pages
-- **⚡ High Performance** - DuckDB-powered analytics with <100ms response times
+- **Secure REST API** - JWT authentication with role-based access control
+- **AI Assistant** - Natural language queries with intelligent SQL generation
+- **Interactive Dashboard** - Real-time analytics with 9 specialized pages
+- **High Performance** - DuckDB-powered analytics with <100ms response times
 
-## 🏗️ Architecture
+## Architecture
 
 ### High-Level Design (HLD)
 
@@ -39,7 +39,7 @@ The LLD diagram shows:
 
 **Tech Stack:** Python • FastAPI • Streamlit • DuckDB • OpenAI • Plotly • JWT
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+
@@ -74,7 +74,7 @@ python run_api.py
 # → http://localhost:8000/docs (Swagger UI)
 ```
 
-## 📊 Features
+## Features
 
 ### Dashboard (9 Pages)
 - **Executive Dashboard** - Comprehensive metrics and KPIs
@@ -96,13 +96,13 @@ python run_api.py
 - **AI Queries** - Natural language to SQL conversion
 - **Admin** - User management (admin-only)
 
-## 🔌 API Usage
+## API Usage
 
 ### Postman Collection
 
 Import the pre-configured Postman collection for instant API testing:
 
-**📦 Collection Files:**
+**Collection Files:**
 - **[HackerOne_API_Collection.postman_collection.json](HackerOne_API_Collection.postman_collection.json)** - All 15+ API endpoints
 - **[HackerOne_API_Environment.postman_environment.json](HackerOne_API_Environment.postman_environment.json)** - Environment variables
 
@@ -144,7 +144,7 @@ curl -X POST "http://localhost:8000/api/v1/query/nlp" \
 
 **Interactive Docs:** http://localhost:8000/docs
 
-## 🔑 Demo Accounts
+## Demo Accounts
 
 | Username | Password | Role | Access |
 |----------|----------|------|--------|
@@ -152,7 +152,7 @@ curl -X POST "http://localhost:8000/api/v1/query/nlp" \
 | `mailru` | `mailru123` | Customer | Mail.ru data only |
 | `shopify` | `shopify123` | Customer | Shopify data only |
 
-## 🤖 AI Assistant
+## AI Assistant
 
 ### Intelligent Query Detection
 
@@ -191,7 +191,7 @@ The AI automatically distinguishes between data queries and conversational quest
 
 **Note:** Requires `OPENAI_API_KEY` in `.env`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── src/
@@ -221,7 +221,7 @@ The AI automatically distinguishes between data queries and conversational quest
 └── run_dashboard.py        # Dashboard server
 ```
 
-## 🔒 Security
+## Security
 
 - **JWT Authentication** - Secure token-based auth with expiration
 - **Role-Based Access Control** - Admin vs. Customer permissions
@@ -229,7 +229,7 @@ The AI automatically distinguishes between data queries and conversational quest
 - **SQL Injection Prevention** - Parameterized queries and escaping
 - **Secrets Management** - Environment-based configuration
 
-## ⚡ Performance
+## Performance
 
 | Metric | Value |
 |--------|-------|
@@ -239,7 +239,7 @@ The AI automatically distinguishes between data queries and conversational quest
 | Dashboard Load | <2s |
 | AI Query Time | 1-3s |
 
-## � Data Insights
+## Data Insights
 
 - **Most Common Vulnerability:** Information Disclosure
 - **Top Bounty Rate:** 90%+ for elite programs
@@ -247,7 +247,7 @@ The AI automatically distinguishes between data queries and conversational quest
 - **Active Organizations:** 100+ programs
 - **Unique Vulnerabilities:** 50+ weakness types
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 **Backend**
 - FastAPI 0.104+ (REST API)
@@ -266,22 +266,22 @@ The AI automatically distinguishes between data queries and conversational quest
 - python-jose (JWT)
 - passlib (Password hashing)
 
-## 📚 Documentation
+## Documentation
 
 - **API Docs:** http://localhost:8000/docs (Swagger UI)
 - **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
-## 🤝 Contributing
+## Contributing
 
 Built for HackerOne's Senior Data Engineer assignment.
 
 **Author:** Hitesh Kumar  
 **Date:** March 2026
 
-## � License
+## License
 
 This project is built for educational and demonstration purposes.
 
 ---
 
-**Built with Python, FastAPI, Streamlit, DuckDB, and OpenAI** 🚀
+**Built with Python, FastAPI, Streamlit, DuckDB, and OpenAI**

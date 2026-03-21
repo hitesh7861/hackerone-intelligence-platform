@@ -19,8 +19,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
-# Essential CSS - Cleaned up
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -499,10 +497,10 @@ if needs_setup:
             from src.elt.pipeline import ELTPipeline
             pipeline = ELTPipeline()
             pipeline.run_full_pipeline()
-            st.success("✅ Data loaded successfully!")
+            st.success("Data loaded successfully!")
             st.rerun()
         except Exception as e:
-            st.error(f"❌ Error loading data: {str(e)}")
+            st.error(f"Error loading data: {str(e)}")
             st.info("Try refreshing the page or contact support if the issue persists.")
             st.stop()
 
@@ -547,11 +545,11 @@ with st.sidebar:
                 from src.elt.pipeline import ELTPipeline
                 pipeline = ELTPipeline()
                 pipeline.run_full_pipeline()
-                st.success("✅ Data refreshed successfully!")
+                st.success("Data refreshed successfully!")
                 st.cache_resource.clear()
                 st.rerun()
             except Exception as e:
-                st.error(f"❌ Error refreshing data: {str(e)}")
+                st.error(f"Error refreshing data: {str(e)}")
     
     st.markdown("---")
     
@@ -629,7 +627,7 @@ if page == "Executive Dashboard":
     
     st.markdown(f"""
     <div style='background-color: #1e3a5f; padding: 0.75rem 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6; margin-top: 0.5rem; margin-bottom: 1rem;'>
-        <span style='color: #60a5fa;'>🔍</span> <strong>{top_vuln}</strong> is the most reported vulnerability type with the highest occurrence across all programs.
+        <strong>{top_vuln}</strong> is the most reported vulnerability type with the highest occurrence across all programs.
     </div>
     """, unsafe_allow_html=True)
     

@@ -31,7 +31,7 @@ class NLPQueryEngine:
         self.schema_context = """
         Database: DuckDB
         
-        IMPORTANT: Always use the pre-aggregated VIEWS for queries, NOT the raw tables!
+        Always use the pre-aggregated VIEWS for queries, NOT the raw tables!
         
         Available Business Views (USE THESE):
         
