@@ -12,7 +12,7 @@
 
 ## Overview
 
-An **AI-first**, production-ready intelligence platform that transforms 10,094 HackerOne vulnerability reports into actionable insights through:
+An **AI-first**, Intelligence platform that transforms 10,094 HackerOne vulnerability reports into actionable insights through:
 
 - **AI Assistant** - Natural language queries with intelligent SQL generation powered by OpenAI GPT-4o-mini
 - **Data-Driven Insights** - Automated pattern detection, concentration analysis, and vulnerability trend identification

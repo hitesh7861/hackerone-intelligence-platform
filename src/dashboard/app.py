@@ -1670,7 +1670,7 @@ if page == "Home":
         <div class="home-badge">✦ Security Intelligence Platform</div>
         <div class="home-title">HackerOne Intelligence Platform</div>
         <div class="home-subtitle">
-          Executive-grade intelligence built on <strong>{total_r} real-world HackerOne disclosures</strong> — visibility into threat patterns, bounty economics, and researcher dynamics across <strong>{total_o} organizations</strong>.
+          Security intelligence with AI-powered insights built on <strong>{total_r} real-world HackerOne disclosures</strong> — visibility into threat patterns, bounty economics, and researcher dynamics across <strong>{total_o} organizations</strong>.
         </div>
       </div>
 
