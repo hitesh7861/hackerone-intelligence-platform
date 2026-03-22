@@ -1,0 +1,14 @@
+[theme]
+base = "light"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8f9fa"
+textColor = "#1a1a1a"
+primaryColor = "#8b5cf6"
+font = "sans serif"
+
+# Button styling - ensure text is visible on all buttons
+[client]
+showErrorDetails = true
+
+[ui]
+hideTopBar = false
