@@ -2156,7 +2156,7 @@ elif page == "Program Benchmarks":
         min_reports_org = st.slider("Minimum Reports", 0, 200, 20, 10, help="Filter organizations by minimum report count", label_visibility="collapsed")
     with col_f2:
         st.markdown("*Minimum Bounty Rate (%)*")
-        st.caption("Filter to organizations that award bounties on at least this percentage of reports. Higher values show more generous programs.")
+        st.caption("Show orgs awarding bounties on at least this % of reports. Higher = more generous.")
         min_bounty_rate = st.slider("Minimum Bounty Rate (%)", 0, 100, 0, 5, help="Filter by minimum bounty success rate", label_visibility="collapsed")
     
     org_df = db.execute_query("""
