@@ -79,9 +79,16 @@ st.markdown("""
     }
     
     .block-container {
-        padding: 1rem 3rem 2rem 3rem;
+        padding: 1rem 3rem 0.5rem 3rem;
         max-width: 1800px;
         background-color: #ffffff;
+    }
+    /* Reduce Streamlit's default bottom padding */
+    .main .block-container {
+        padding-bottom: 0.5rem !important;
+    }
+    footer {
+        display: none !important;
     }
 
     
@@ -842,12 +849,58 @@ st.markdown("""
                 // Also try dispatching to document
                 document.dispatchEvent(escEvent);
                 
-                // Blur the input as fallback
-                searchInputFound.blur();
-            }
         }
-    }, true);
-</script>
+        
+        forceLightThemeButtons();
+        setTimeout(forceLightThemeButtons, 200);
+        setTimeout(forceLightThemeButtons, 600);
+        setTimeout(forceLightThemeButtons, 1200);
+        setTimeout(forceLightThemeButtons, 2500);
+        
+        const observer = new MutationObserver(() => setTimeout(forceLightThemeButtons, 50));
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        
+        // Close dataframe search on outside click by simulating ESC key
+        document.addEventListener('click', function(event) {
+            // Check if there's an active search input in any dataframe
+            const allInputs = document.querySelectorAll('input[type="text"], input[placeholder*="search" i], input[placeholder*="Type to search" i]');
+            
+            let searchInputFound = null;
+            allInputs.forEach(function(input) {
+                // Check if this input is inside a dataframe search overlay
+                const parent = input.closest('[class*="search"], [data-testid="stDataFrame"]');
+                if (parent && window.getComputedStyle(input).display !== 'none' && input.offsetParent !== null) {
+                    searchInputFound = input;
+                }
+            });
+            
+            if (searchInputFound) {
+                // Check if click was outside the search input and its container
+                const searchContainer = searchInputFound.closest('[class*="search"], div[style*="position"]');
+                const clickedOnSearchButton = event.target.closest('button[title*="Search" i], button[aria-label*="Search" i]');
+                
+                if (searchContainer && !searchContainer.contains(event.target) && !clickedOnSearchButton) {
+                    // Simulate ESC key press to close the search
+                    const escEvent = new KeyboardEvent('keydown', {
+                        key: 'Escape',
+                        code: 'Escape',
+                        keyCode: 27,
+                        which: 27,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    searchInputFound.dispatchEvent(escEvent);
+                    
+                    // Also try dispatching to document
+                    document.dispatchEvent(escEvent);
+                    
+                    // Blur the input as fallback
+                    searchInputFound.blur();
+                }
+            }
+        }, true);
+        
+    </script>
 """, unsafe_allow_html=True)
 
 # Check if database exists and has data, if not run pipeline (only once per session)
@@ -914,10 +967,6 @@ def get_db_connection():
 
 db = get_db_connection()
 
-# Clear any stale query params
-if st.query_params:
-    st.query_params.clear()
-
 def render_table(df, height=400):
     """Render DataFrame with st.data_editor."""
     if df is None or df.empty:
@@ -964,6 +1013,11 @@ with st.sidebar:
     if dashboard_path.exists():
         with open(str(dashboard_path), 'rb') as f:
             dashboard_data = base64.b64encode(f.read()).decode()
+    submit_path = Path(__file__).parent / "assets" / "submit.png"
+    submit_data = ""
+    if submit_path.exists():
+        with open(str(submit_path), 'rb') as f:
+            submit_data = base64.b64encode(f.read()).decode()
 
     # Session state init
     if 'current_page' not in st.session_state:
@@ -1239,11 +1293,28 @@ with st.sidebar:
     body:has([data-testid="stSidebar"][aria-expanded="false"]) #mn-root {{
         display: flex !important;
     }}
-    /* Push content right when mini nav visible */
+    /* Push content right when mini nav visible - only when sidebar is actually collapsed */
     body:has([data-testid="stSidebar"][aria-expanded="false"]) [data-testid="stAppViewContainer"] {{
         padding-left: 52px !important;
     }}
-    /* Hide native collapsed control offscreen but keep it clickable by JS */
+    /* On mobile: shrink mini nav, ensure content doesn't get hidden */
+    @media (max-width: 768px) {{
+        #mn-root {{
+            width: 40px !important;
+        }}
+        .mn-btn {{ width: 30px; height: 30px; }}
+        .mn-btn img {{ width: 16px; height: 16px; }}
+        .mn-logo {{ width: 24px; height: 24px; }}
+        #mn-exp {{ width: 30px; height: 30px; font-size: 14px; }}
+        body:has([data-testid="stSidebar"][aria-expanded="false"]) [data-testid="stAppViewContainer"] {{
+            margin-left: 40px !important;
+            padding-left: 0 !important;
+            width: calc(100% - 40px) !important;
+            max-width: calc(100vw - 40px) !important;
+            overflow-x: hidden !important;
+        }}
+    }}
+    /* Hide native collapsed control - keep it clickable by JS */
     button[data-testid="collapsedControl"] {{
         position: fixed !important;
         left: -9999px !important;
@@ -1497,10 +1568,44 @@ _components.html("""
     PD.addEventListener('click', function() { closePopup(); });
   }
 
+  // Hide mini nav on mobile when sidebar is open
+  function manageMobileNav() {
+    var sidebar = PD.querySelector('[data-testid="stSidebar"]');
+    var mnRoot = PD.getElementById('mn-root');
+    var appContainer = PD.querySelector('[data-testid="stAppViewContainer"]');
+    
+    if (!sidebar || !mnRoot) return;
+    
+    var isMobile = window.parent.innerWidth <= 768;
+    var sidebarExpanded = sidebar.getAttribute('aria-expanded') !== 'false';
+    var navW = isMobile ? '40px' : '52px';
+    
+    if (!sidebarExpanded) {
+      mnRoot.style.display = 'flex';
+      mnRoot.style.width = navW;
+      if (appContainer) {
+        appContainer.style.marginLeft = navW;
+        appContainer.style.paddingLeft = '0';
+        appContainer.style.width = 'calc(100% - ' + navW + ')';
+        appContainer.style.maxWidth = 'calc(100vw - ' + navW + ')';
+        appContainer.style.overflowX = 'hidden';
+      }
+    } else {
+      mnRoot.style.display = 'none';
+      if (appContainer) {
+        appContainer.style.marginLeft = '0';
+        appContainer.style.paddingLeft = '0';
+        appContainer.style.width = '';
+        appContainer.style.maxWidth = '';
+      }
+    }
+  }
+
   // Every tick: reparent to body (escape React stacking context), then bind events
   var timer = window.parent.setInterval(function() {
     reparentToBody();
     if (PD.getElementById('mn-exp')) { bindAll(); }
+    manageMobileNav();
   }, 300);
 
   // Initial run on load
@@ -1510,6 +1615,26 @@ _components.html("""
   } else {
     init();
   }
+
+  // Intercept parent history API to strip hash and query params
+  try {
+    var W = window.parent;
+    var _p = W.history.pushState.bind(W.history);
+    var _r = W.history.replaceState.bind(W.history);
+    function strip(url) {
+      if (!url) return url;
+      var s = String(url);
+      var i = s.indexOf('?'); if (i > -1) s = s.substring(0, i);
+      var j = s.indexOf('#'); if (j > -1) s = s.substring(0, j);
+      return s || '/';
+    }
+    W.history.pushState = function(a,b,u) { return _p(a,b,strip(u)); };
+    W.history.replaceState = function(a,b,u) { return _r(a,b,strip(u)); };
+    // Clean current URL immediately
+    if (W.location.hash || W.location.search) {
+      _r(null, '', W.location.pathname);
+    }
+  } catch(e) {}
 })();
 </script>
 """, height=1, scrolling=False)
@@ -1602,6 +1727,14 @@ if page == "Home":
         margin-bottom: 0.25rem;
     }}
     .home-stat-num.green {{ color: #059669; }}
+    @media (max-width: 768px) {{
+        .home-stats {{
+            grid-template-columns: 1fr 1fr !important;
+        }}
+        .home-stat-num {{
+            font-size: 1.3rem;
+        }}
+    }}
     .home-stat-label {{
         font-size: 0.7rem;
         color: #64748b;
@@ -1740,7 +1873,7 @@ if page == "Home":
 
 # Main content - Executive Dashboard page
 elif page == "Executive Dashboard":
-    st.title("Executive Dashboard")
+    st.title("Executive Dashboard", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comprehensive intelligence platform providing real-time visibility into global vulnerability landscape, bounty economics, and security program performance</p>", unsafe_allow_html=True)
     
     metrics = db.execute_query("""
@@ -1797,7 +1930,7 @@ elif page == "Executive Dashboard":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Threat Landscape")
+        st.subheader("Threat Landscape", anchor=False)
         top_vulns = db.execute_query("""
             SELECT weakness_name, total_reports, bounty_rate
             FROM vw_vulnerability_metrics
@@ -1835,7 +1968,7 @@ elif page == "Executive Dashboard":
         """, unsafe_allow_html=True)
     
     with col2:
-        st.subheader("Program Performance Matrix")
+        st.subheader("Program Performance Matrix", anchor=False)
         top_orgs = db.execute_query("""
             SELECT team_name, total_reports, bounty_rate, avg_votes
             FROM vw_organization_metrics
@@ -1877,7 +2010,7 @@ elif page == "Executive Dashboard":
     
     st.markdown("---")
     
-    st.subheader("Recent Activity")
+    st.subheader("Recent Activity", anchor=False)
     recent = db.execute_query("""
         SELECT id, title, team_name, weakness_name, created_at, 
                CASE WHEN has_bounty THEN 'Yes' ELSE 'No' END as bounty
@@ -1889,7 +2022,7 @@ elif page == "Executive Dashboard":
     render_table(recent, height=400)
 
 elif page == "Threat Intelligence":
-    st.title("Threat Intelligence")
+    st.title("Threat Intelligence", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Deep-dive analysis of security weaknesses, attack patterns, and economic incentives driving the vulnerability disclosure ecosystem</p>", unsafe_allow_html=True)
     
     st.markdown("**Filters**")
@@ -1935,7 +2068,7 @@ elif page == "Threat Intelligence":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Volume vs Bounty Success")
+        st.subheader("Volume vs Bounty Success", anchor=False)
         # Scatter plot
         fig = px.scatter(vuln_df_display.head(30), 
                         x='total_reports', 
@@ -1959,7 +2092,7 @@ elif page == "Threat Intelligence":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.subheader("Top Threats by Bounty Rate")
+        st.subheader("Top Threats by Bounty Rate", anchor=False)
         top_bounty = vuln_df_display.nlargest(10, 'bounty_rate')
         fig = px.bar(top_bounty, 
                      x='bounty_rate', 
@@ -1996,7 +2129,7 @@ elif page == "Threat Intelligence":
     # Data table with sort option
     col_t1, col_t2 = st.columns([3, 1])
     with col_t1:
-        st.subheader("Detailed Breakdown")
+        st.subheader("Detailed Breakdown", anchor=False)
     with col_t2:
         st.markdown("*Sort By*")
         sort_by = st.selectbox("Sort By", ["Reports", "Bounty Rate"], help="Sort table by metric", label_visibility="collapsed")
@@ -2012,7 +2145,7 @@ elif page == "Threat Intelligence":
     )
 
 elif page == "Program Benchmarks":
-    st.title("Program Benchmarks")
+    st.title("Program Benchmarks", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comparative analysis of security program maturity, researcher engagement, and bounty investment across industry leaders</p>", unsafe_allow_html=True)
     
     st.markdown("**Filters**")
@@ -2047,7 +2180,7 @@ elif page == "Program Benchmarks":
     st.markdown("---")
     
     # Performance Matrix Scatter Plot
-    st.subheader("Program Performance Quadrant Analysis")
+    st.subheader("Program Performance Quadrant Analysis", anchor=False)
     
     fig = px.scatter(org_df.head(50), 
                     x='total_reports', 
@@ -2082,14 +2215,14 @@ elif page == "Program Benchmarks":
     
     st.markdown("---")
     
-    st.subheader("Detailed Organization Data")
+    st.subheader("Detailed Organization Data", anchor=False)
     render_table(
         org_df[['team_name', 'total_reports', 'bounty_reports', 'avg_votes', 'bounty_rate']],
         height=400
     )
 
 elif page == "Community Analytics":
-    st.title("Community Analytics")
+    st.title("Community Analytics", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Security researcher ecosystem analysis: contribution patterns, quality metrics, and community engagement dynamics</p>", unsafe_allow_html=True)
     
     researcher_df = db.execute_query("""
@@ -2115,7 +2248,7 @@ elif page == "Community Analytics":
     )
 
 elif page == "Market Evolution":
-    st.title("Market Evolution")
+    st.title("Market Evolution", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Temporal analysis of vulnerability disclosure market dynamics, program growth trajectories, and emerging security trends</p>", unsafe_allow_html=True)
     
     trend_df = db.execute_query("""
@@ -2123,7 +2256,7 @@ elif page == "Market Evolution":
         ORDER BY month
     """)
     
-    st.subheader("Report Volume Over Time")
+    st.subheader("Report Volume Over Time", anchor=False)
     
     # Add padding columns to prevent toolbar overflow
     col_left, col_chart, col_right = st.columns([0.05, 0.9, 0.05])
@@ -2148,7 +2281,7 @@ elif page == "Market Evolution":
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True, 'displaylogo': False})
 
 elif page == "Strategic Insights":
-    st.title("Strategic Insights & Recommendations")
+    st.title("Strategic Insights & Recommendations", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Executive intelligence briefings with data-driven recommendations for optimizing security investments and program effectiveness</p>", unsafe_allow_html=True)
     
     # Executive Summary Metrics
@@ -2391,10 +2524,9 @@ elif page == "Strategic Insights":
         """)
 
 elif page == "AI Assistant":
-    # Header with clean clear button
     col1, col2 = st.columns([0.85, 0.15])
     with col1:
-        st.title("AI-Powered Assistant")
+        st.title("AI-Powered Assistant", anchor=False)
     with col2:
         # CSS to style Clear button - bigger with border, aligned right
         st.markdown("""
@@ -2439,43 +2571,7 @@ elif page == "AI Assistant":
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
         
-        # Add CSS for chat input with send arrow button
-        st.markdown("""
-        <style>
-        /* Style chat input with send arrow button */
-        [data-testid="stChatInput"] {
-            position: relative !important;
-        }
-        [data-testid="stChatInput"] textarea {
-            padding-right: 3.5rem !important;
-        }
-        [data-testid="stChatInput"]::before {
-            content: "↑";
-            position: absolute;
-            right: 1.2rem;
-            bottom: 1.2rem;
-            font-size: 1.3rem;
-            color: #ffffff;
-            background: #8b5cf6;
-            width: 2rem;
-            height: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s, background 0.2s;
-            z-index: 10;
-        }
-        [data-testid="stChatInput"]:focus-within::before {
-            opacity: 1;
-        }
-        [data-testid="stChatInput"]:focus-within:hover::before {
-            background: #7c3aed;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        
         
         if prompt := st.chat_input("Ask about vulnerability data..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
@@ -2541,10 +2637,10 @@ elif page == "AI Assistant":
                         st.session_state.messages.append({"role": "assistant", "content": error_msg})
 
 elif page == "Security Reference":
-    st.title("Security Reference")
+    st.title("Security Reference", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Comprehensive knowledge repository covering vulnerability taxonomies, security metrics, and industry-standard terminology</p>", unsafe_allow_html=True)
     
-    st.markdown("Comprehensive glossary of common vulnerability types and security concepts.")
+    # st.markdown("Comprehensive glossary of common vulnerability types and security concepts.")
     
     search = st.text_input("Search for a vulnerability type", placeholder="e.g., XSS, SQL Injection...")
     
@@ -2621,7 +2717,7 @@ elif page == "Security Reference":
                 st.markdown("*Check OWASP or CWE for detailed information.*")
     
     st.markdown("---")
-    st.subheader("External Resources")
+    st.subheader("External Resources", anchor=False)
     st.markdown("""
     - [OWASP Top 10](https://owasp.org/www-project-top-ten/) - Most critical web application security risks
     - [CWE Database](https://cwe.mitre.org/) - Common Weakness Enumeration
@@ -2630,7 +2726,7 @@ elif page == "Security Reference":
     """)
 
 elif page == "Data Workbench":
-    st.title("Data Workbench")
+    st.title("Data Workbench", anchor=False)
     st.markdown("<p style='color: #666666; font-size: 1rem; margin-top: -1rem; margin-bottom: 2rem;'>Interactive data exploration workspace with advanced filtering, custom queries, and export capabilities for ad-hoc analysis</p>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
